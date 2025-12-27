@@ -1,10 +1,16 @@
 const express = require("express");
-const { body } = require("express-validator");
+//const multer = require('multer');
 
 const router = express.Router();
-// const {authMiddleware} = require("../middlewares/auth.middleware");
-const { dealerProfile } = require("../controllers/dealerProfile.controller");
+const authMiddleware = require("../middlewares/auth.middleware");
+const { createDealerProfile, getDealerProfile, updateDealerProfile } = require("../controllers/dealerProfile.controller");
 
+// POST /api/dealer/create-profile -> create profile for authenticated dealer
+router.post('/create-profile', authMiddleware, createDealerProfile);
 
-router.get('/profile', dealerProfile); 
+// GET /api/dealer/get-profile  -> fetch profile for authenticated dealer
+router.get('/get-profile', authMiddleware, getDealerProfile);
+
+// PUT /api/dealer/update-profile  -> update profile for authenticated dealer
+router.put('/update-profile', authMiddleware, updateDealerProfile);
 module.exports = router;
