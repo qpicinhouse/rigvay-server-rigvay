@@ -7,6 +7,7 @@ const rateLimiter = require("./middlewares/rateLimiter");
 const errorHandler = require("./middlewares/error.middleware");
 const authRoutes = require("./routes/auth.routes");
 const dealerAuthRoutes = require("./routes/dealerAuthRoutes.routes");
+const dealerProfileRoutes = require("./routes/dealerProfile.routes");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(rateLimiter);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use('/api/auth-dealer', dealerAuthRoutes);
+app.use('/api/dealer', dealerProfileRoutes);
 
 
 // Error handler

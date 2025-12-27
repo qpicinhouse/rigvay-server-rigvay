@@ -4,13 +4,13 @@ const Dealer = require("../models/dealer.model");
 const { generateOTP, otpExpiry } = require("../utils/otp");
 const { sendOTPViaDLT } = require("../utils/dltService");
 const { ApiResponse } = require("../utils/ApiResponse");
-
+const { generateAccessToken } = require("../utils/token");
 const JWT_SECRET = process.env.JWT_SECRET || 'secrets_secrets';
 const JWT_EXPIRES_IN = '7d';
 
-function signToken(dealer) {
-  return jwt.sign({ id: dealer._id, email: dealer.email, phone: dealer.phone }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-}
+// function generateAccessToken(dealer) {
+//   return jwt.sign({ id: dealer._id, email: dealer.email, phone: dealer.phone }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+// }
 
 module.exports.register = async function register(req, res) {
   try {
@@ -64,7 +64,7 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
     dealer.otpExpires = undefined;
     await dealer.save();
 
-    const token = signToken(dealer);
+    const token = generateAccessToken({ id: dealer._id, email: dealer.email, phone: dealer.phone });
     return res.status(200).json(new ApiResponse(200,"Registration successful.", token));
   } catch (err) {
     console.error(err);
@@ -82,7 +82,7 @@ module.exports.loginWithEmail = async function loginWithEmail(req, res) {
     if (!ok) return res.status(401).json(new ApiResponse(401,"Invalid credentials", ''));
     // if (!dealer.isVerified) return res.status(403).json({ message: 'Please verify your account first' });
 
-    const token = signToken(dealer);
+    const token = generateAccessToken({ id: dealer._id, email: dealer.email, phone: dealer.phone });
     return res.status(200).json(new ApiResponse(200,"Login successful", token));
   } catch (err) {
     console.error(err);
@@ -128,7 +128,7 @@ module.exports.verifyLoginOTP = async function verifyLoginOTP(req, res) {
     dealer.otpExpires = undefined;
     await dealer.save();
 
-    const token = signToken(dealer);
+    const token = generateAccessToken({ id: dealer._id, email: dealer.email, phone: dealer.phone });
     return res.status(200).json(new ApiResponse(200,"Login successful", token));
   } catch (err) {
     console.error(err);

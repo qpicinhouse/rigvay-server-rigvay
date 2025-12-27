@@ -30,7 +30,7 @@ const authMiddleware = (req, res, next) => {
     // 5️⃣ Attach user info to request
     req.user = decoded; // { id: userId }
 
-    next();
+    //next();
   } catch (error) {
     return res.status(401).json({
       message: "Unauthorized - Invalid or expired token"
