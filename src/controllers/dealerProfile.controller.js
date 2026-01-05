@@ -1,7 +1,7 @@
 const Dealer = require("../models/dealer.model");
 const DealerProfile = require("../models/dealerProfile.model");
 const Subscription = require("../models/subscription.model");
-// const { uploadImage } = require("../utils/cloudinary");
+const { uploadOnCloudinary } = require("../utils/cloudinary");
 const { ApiResponse } = require("../utils/ApiResponse");
 
 function generateRegvayId() {
@@ -20,20 +20,12 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
     let profile = await DealerProfile.findOne({ dealer: dealerId });
     if (!profile) profile = new DealerProfile({ dealer: dealerId });
 
-    // If file uploaded (multer memoryStorage), upload to Cloudinary
-    // if (req.file && req.file.buffer) {
-    //   const filename = `dealer_${dealerId}`;
-    //   const result = await uploadImage(
-    //     req.file.buffer,
-    //     filename,
-    //     "dealer_profiles"
-    //   );
-    //   if (result && result.secure_url) {
-    //     profile.profileImageUrl = result.secure_url;
-    //   }
-    // }
-
-    //
+     if (req.file && req.file.path) {
+      const result = await uploadOnCloudinary(req.file.path);
+      if (result && result.secure_url) {
+        profile.profileImageUrl = result.secure_url;
+      }
+    }
 
     // ensure rigvay_id on profile
      if (!profile.rigvay_id){     
@@ -147,8 +139,14 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
 
     let profile = await DealerProfile.findOne({ dealer: dealerId });
     if (!profile) return res.status(404).json(new ApiResponse(404, 'Dealer profile not found'));
-
-   
+    if (req.file && req.file.path) {
+        const result = await uploadOnCloudinary(req.file.path);
+        console.log("result ",result);
+        
+        if (result && result.secure_url) {
+          profile.profileImageUrl = result.secure_url;
+        }
+      }
     const fields = [
       'firstName','lastName','phone','email','companyName','aboutCompany',
       'companyPhone','companyEmail','companyWhatsapp','addressLine1','addressLine2','addressLine3',
