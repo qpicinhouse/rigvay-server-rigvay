@@ -1,7 +1,7 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Plan = require('../models/Plan.model');
-const Subscription = require('../models/Subscription.model');
+const Subscription = require('../models/subscription.model');
 const Dealer = require('../models/dealer.model');
 const DealerProfile = require('../models/dealerProfile.model');
 

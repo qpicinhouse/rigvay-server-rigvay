@@ -1,6 +1,6 @@
 const Dealer = require("../models/dealer.model");
 const DealerProfile = require("../models/dealerProfile.model");
-const Subscription = require("../models/Subscription.model");
+const Subscription = require("../models/subscription.model");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
 const { ApiResponse } = require("../utils/ApiResponse");
 

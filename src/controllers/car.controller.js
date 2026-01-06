@@ -1,5 +1,5 @@
 const Car = require('../models/Car.model');
-const Subscription = require('../models/Subscription.model');
+const Subscription = require('../models/subscription.model');
 
 const buildImages = (files = []) =>
   files.map((file, index) => ({
