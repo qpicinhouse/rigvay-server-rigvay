@@ -1,6 +1,6 @@
 const Dealer = require("../models/dealer.model");
 const DealerProfile = require("../models/dealerProfile.model");
-const Subscription = require("../models/subscription.model");
+const Subscription = require("../models/Subscription.model");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
 const { ApiResponse } = require("../utils/ApiResponse");
 
@@ -114,7 +114,8 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
 
 module.exports.getDealerProfile = async function getDealerProfile(req, res, next) {
   try {
-    const dealerId = req.dealer.id;
+    console.log(req.user);
+    const dealerId = req.user?.id;
     const dealer = await Dealer.findById(dealerId);
     if (!dealer) return res.status(404).json(new ApiResponse(404, 'Dealer not found'));
 
@@ -131,8 +132,9 @@ module.exports.getDealerProfile = async function getDealerProfile(req, res, next
 
 module.exports.updateDealerProfile = async function updateDealerProfile(req, res, next) {
   try {
-    const dealerId = req.dealer.id;
+    const dealerId = req.user.id;
     const payload = req.body || {};
+    console.log("payload ",payload);
 
     const dealer = await Dealer.findById(dealerId);
     if (!dealer) return res.status(404).json(new ApiResponse(404, 'Dealer not found'));

@@ -1,0 +1,138 @@
+const mongoose = require("mongoose");
+
+const carSchema = new mongoose.Schema(
+  {
+    dealer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dealer",
+      required: true,
+      index: true
+    },
+
+    brand: { type: String, required: true },
+    model: { type: String, required: true },
+    year: { type: Number, required: true },
+    registrationYear: { type: Number },
+
+    price: { type: Number, required: true },
+    priceAdditionalText: { type: String },
+
+    type: { type: String },
+    body: { type: String },
+    fuelType: { type: String },
+    transmission: { type: String },
+
+    mileage: { type: Number },
+    distance: { type: Number },
+
+    engineInfo: { type: String },
+    vin: { type: String },
+
+    ownerType: { type: String },
+    ownersCount: { type: Number },
+
+    representative: { type: String },
+    businessPartner: { type: String },
+
+    location: {
+      state: String,
+      city: String
+    },
+
+    doors: Number,
+    interiorColor: String,
+    exteriorColor: String,
+
+    description: { type: String, maxlength: 2000 },
+
+    images: [
+      {
+        url: { type: String, required: true },
+        isPrimary: { type: Boolean, default: false },
+        uploadedAt: { type: Date, default: Date.now }
+      }
+    ],
+
+    equipment: {
+      interior: {
+        numberOfSeats: Number,
+        parkingSensors: Boolean,
+        interiorDesign: String,
+        climateControl: Boolean,
+        airbagType: String,
+
+        features: {
+          tunerRadio: Boolean,
+          bluetooth: Boolean,
+          cdPlayer: Boolean,
+          mp3Interface: Boolean,
+          electricHeatedSeats: Boolean,
+          electricSideMirror: Boolean,
+          electricSeatAdjustment: Boolean,
+          startStopSystem: Boolean,
+          skiBag: Boolean,
+          rainSensor: Boolean,
+          powerSteering: Boolean,
+          onboardComputer: Boolean,
+          navigationSystem: Boolean,
+          cruiseControl: Boolean,
+          handsFreeKit: Boolean,
+          isofix: Boolean,
+          electricWindows: Boolean,
+          headUpDisplay: Boolean,
+          centralLocking: Boolean,
+          multifunctionSteeringWheel: Boolean
+        }
+      },
+
+      exterior: {
+        sunroof: Boolean,
+        roofRack: Boolean,
+        panoramicRoof: Boolean,
+        metallicExterior: Boolean,
+        alloyWheels: Boolean,
+        trailerCoupling: Boolean
+      }
+    },
+
+    environment: {
+      fuelConsumption: String,
+      emissionSticker: String,
+      emissionClass: String,
+
+      safety: {
+        abs: Boolean,
+        esp: Boolean,
+        tractionControl: Boolean,
+        immobilizer: Boolean,
+        xenonHeadlights: Boolean,
+        fogLamp: Boolean,
+        daytimeRunningLights: Boolean,
+        adaptiveLighting: Boolean,
+        fourWheelDrive: Boolean,
+        particulateFilter: Boolean
+      }
+    },
+
+    extras: {
+      sportsSuspension: Boolean,
+      sportsPackage: Boolean,
+      sportsSeats: Boolean
+    },
+
+    status: {
+      type: String,
+      enum: ["live", "review", "sold"],
+      default: "review"
+    },
+
+    postedAt: { type: Date, default: Date.now },
+    isDeleted: { type: Boolean, default: false }
+  },
+  { timestamps: true }
+);
+
+carSchema.index({ dealer: 1, isDeleted: 1 });
+carSchema.index({ status: 1 });
+
+module.exports = mongoose.model("Car", carSchema);

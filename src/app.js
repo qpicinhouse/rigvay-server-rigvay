@@ -8,7 +8,8 @@ const errorHandler = require("./middlewares/error.middleware");
 const authRoutes = require("./routes/auth.routes");
 const dealerAuthRoutes = require("./routes/dealerAuthRoutes.routes");
 const dealerProfileRoutes = require("./routes/dealerProfile.routes");
-
+const subscriptionRoutes = require("./routes/subscription.routes");
+const carRoutes = require("./routes/car.routes");
 const app = express();
 
 // Global middlewares
@@ -25,6 +26,9 @@ app.use(rateLimiter);
 app.use("/api/auth", authRoutes);
 app.use('/api/auth-dealer', dealerAuthRoutes);
 app.use('/api/dealer', dealerProfileRoutes);
+app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/dealer', carRoutes);
+app.use('/home', ()=>{console.log("hello")});
 
 
 // Error handler
