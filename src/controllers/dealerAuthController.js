@@ -1,5 +1,5 @@
 const Dealer = require("../models/dealer.model");
-const DealerProfile = require("../models/dealerProfile.model");
+const DealerOTP = require("../models/dealerOtp.model");
 const { generateOTP, otpExpiry } = require("../utils/otp");
 const { sendOTPViaDLT } = require("../utils/dltService");
 const { ApiResponse } = require("../utils/ApiResponse");
@@ -13,21 +13,17 @@ module.exports.register = async function register(req, res) {
       return res.status(400).json(new ApiResponse(400, "Missing fields", ''));
     }
 
-    const existing = await Dealer.findOne({ $or: [{ email }, { phone }] });
-    if (existing) {
-      return res.status(409).json(new ApiResponse(409, "Email or phone already in use", ''));
+    const exists = await Dealer.findOne({ $or: [{ email }, { phone }] }) || await DealerOTP.findOne({ $or: [{ email }, { phone }] });
+    if (exists) {
+      return res.status(409).json(
+        new ApiResponse(409, "Email or phone already in use resister After 1 Min ", "")
+      );
     }
 
     const otp = generateOTP();
-    const hash_Password = await hashPassword(password);
-    const dealer = new Dealer({ 
-      email, 
-      phone, 
-      password: hash_Password, 
-      otp, 
-      otpExpires: otpExpiry(5) 
-    });
-    await dealer.save();
+    const tempDealer = new DealerOTP({email,phone,password: passwordHash,otp,otpExpires: otpExpiry(1)});
+    await tempDealer.save();
+
     await sendOTPViaDLT(phone, otp);
 
     return res.status(200).json(new ApiResponse(200, "Registration initiated, OTP sent to phone", ''));
@@ -44,23 +40,28 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
       return res.status(400).json(new ApiResponse(400, "Missing phone or otp", ''));
     }
 
-    const dealer = await Dealer.findOne({ phone });
-    if (!dealer) {
-      return res.status(404).json(new ApiResponse(404, 'Dealer not found', ''));
+    const tempDealer = await TempDealer.findOne({ phone });
+    if (!tempDealer) {
+      return res.status(404).json( new ApiResponse(404, "Registration not found", ""));
     }
 
-    if ((dealer.otpExpires && new Date() > dealer.otpExpires)) {
-      await Dealer.deleteOne({ _id: dealer._id }).catch(() => {});
-      return res.status(400).json(new ApiResponse(400, "OTP expired; registration removed. Please register again.", ''));
+    // If otp or otpExpires missing, or explicitly expired -> remove the unverified registration
+    //  if (!dealer.otp || !dealer.otpExpires || new Date() > dealer.otpExpires)
+      //
+    if (new Date() > tempDealer.otpExpires) {
+      await TempDealer.deleteOne({ _id: tempDealer._id });
+      return res.status(400).json(new ApiResponse(400, "OTP expired. Please register again.", ""));
     }
 
-    if (dealer.otp !== otp) { 
-      return res.status(400).json(new ApiResponse(400, "Invalid OTP", ''));
+    if (tempDealer.otp !== otp){ 
+      return res.status(400).json(new ApiResponse(400,"Invalid OTP.", ''));
     }
-
+    // Move to Dealer collection 
+    const dealer = new Dealer({email: tempDealer.email, phone: tempDealer.phone, password: tempDealer.password});
     dealer.otp = undefined;
     dealer.otpExpires = undefined;
     await dealer.save();
+
 
     // Check if profile exists
     const profile = await DealerProfile.findOne({ dealer: dealer._id });
@@ -75,7 +76,7 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
       },
       'dealer' // Add userType here
     );
-
+    await TempDealer.deleteOne({ _id: tempDealer._id });
     return res.status(200).json(new ApiResponse(200, "Registration successful", {
       token,
       user: {
@@ -85,6 +86,7 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
         hasProfile
       }
     }));
+
   } catch (err) {
     console.error(err);
     return res.status(500).json(new ApiResponse(500, "Server error", ''));
@@ -151,7 +153,7 @@ module.exports.sendLoginOTP = async function sendLoginOTP(req, res) {
 
     const otp = generateOTP();
     dealer.otp = otp;
-    dealer.otpExpires = otpExpiry(5);
+    dealer.otpExpires = otpExpiry(1);
     await dealer.save();
     await sendOTPViaDLT(phone, otp);
 
