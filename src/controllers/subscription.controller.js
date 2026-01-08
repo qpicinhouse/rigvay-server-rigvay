@@ -22,7 +22,7 @@ exports.getPlans = async (req, res) => {
 
 exports.getCurrentSubscription = async (req, res) => {
     try {;
-    const dealerId = req.user._id;
+    const dealerId = req.user.id;
     
     const subscription = await Subscription.findOne({
       dealer: dealerId,
@@ -39,44 +39,89 @@ exports.getCurrentSubscription = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { planId } = req.body;
-    const dealerId = req.user._id;
+    console.log('RZP KEY:', process.env.RAZORPAY_KEY_ID);
+console.log('RZP SECRET:', process.env.RAZORPAY_KEY_SECRET ? 'OK' : 'MISSING');
 
-    const plan = await Plan.findById(planId);
-    if (!plan || !plan.active) {
-      return res.status(404).json({ success: false, message: 'Plan not found' });
+    console.log('req body:', req.body);
+    console.log('req user:', req.user);
+
+    const { planId } = req.body;
+    const dealerId = req.user?.id;
+
+    // Auth check
+    if (!dealerId) {
+      return res.status(201).json({
+        success: false,
+        message: 'Unauthorized: dealer not found'
+      });
     }
 
+    // Validation
+    if (!planId) {
+      return res.status(201).json({
+        success: false,
+        message: 'planId is required'
+      });
+    }
+
+    // Fetch plan
+    const plan = await Plan.findById(planId);
+    if (!plan || !plan.active) {
+      return res.status(404).json({
+        success: false,
+        message: 'Plan not found or inactive'
+      });
+    }
+
+    // Fetch dealer info (null-safe)
     const dealerProfile = await DealerProfile.findOne({ dealer: dealerId });
     const dealer = await Dealer.findById(dealerId);
 
+    // Razorpay order options (ALL RULES FOLLOWED)
     const options = {
-      amount: plan.amount * 100,
+      amount: Number(plan.amount) * 100, // must be number
       currency: 'INR',
-      receipt: `order_${dealerId}_${Date.now()}`,
+      receipt: `ord_${Date.now()}`, // < 40 chars (IMPORTANT)
       notes: {
-        dealerId: dealerId.toString(),
-        planId: planId.toString(),
-        planName: plan.name
+        dealerId: String(dealerId),
+        planId: String(planId),
+        planName: String(plan.name)
       }
     };
 
-    const order = await razorpay.orders.create(options);
+    // Create Razorpay order with proper error capture
+    let order;
+    try {
+      order = await razorpay.orders.create(options);
+    } catch (rzpError) {
+      console.error('Razorpay error:', rzpError);
+      return res.status(500).json({
+        success: false,
+        message: rzpError?.error?.description || rzpError.message
+      });
+    }
 
-    res.status(200).json({
+    // Respond to frontend
+    return res.status(200).json({
       success: true,
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
       razorpayKeyId: process.env.RAZORPAY_KEY_ID,
-      email: dealerProfile?.email || dealer.email,
-      phone: dealerProfile?.phone || dealer.phone,
+      email: dealerProfile?.email || dealer?.email || '',
+      phone: dealerProfile?.phone || dealer?.phone || ''
     });
+
   } catch (error) {
-    console.error('Error creating order:', error);
-    res.status(500).json({ success: false, message: 'Error creating order' });
+    console.error('Create order failed:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Error creating order'
+    });
   }
 };
+
+
 
 exports.verifyPayment = async (req, res) => {
   try {
@@ -87,7 +132,7 @@ exports.verifyPayment = async (req, res) => {
       planId
     } = req.body;
 
-    const dealerId = req.user._id;
+    const dealerId = req.user.id;
 
     const sign = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSign = crypto
@@ -147,7 +192,7 @@ exports.verifyPayment = async (req, res) => {
 
 exports.checkCarLimit = async (req, res) => {
   try {
-    const dealerId = req.user._id;
+    const dealerId = req.user.id;
 
     const subscription = await Subscription.findOne({
       dealer: dealerId,

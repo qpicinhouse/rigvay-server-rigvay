@@ -5,6 +5,7 @@ const { sendOTPViaDLT } = require("../utils/dltService");
 const { ApiResponse } = require("../utils/ApiResponse");
 const { generateAccessToken } = require("../utils/token");
 const { hashPassword, comparePassword } = require("../utils/hash");
+const DealerProfile = require("../models/dealerProfile.model");
 
 module.exports.register = async function register(req, res) {
   try {
