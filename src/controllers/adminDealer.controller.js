@@ -1,7 +1,7 @@
 const DealerProfile = require("../models/dealerProfile.model");
 const {ApiResponse}= require("../utils/ApiResponse");
 
-exports.getAllDealers = async (req, res, next) => {
+module.exports.getAllDealers = async function (req, res){
   try {
     const dealers = await DealerProfile.find().populate("dealer", "email phone");
     return res.status(200).json(new ApiResponse(200, "All dealers fetched", dealers));
@@ -10,7 +10,7 @@ exports.getAllDealers = async (req, res, next) => {
   }
 };
 
-exports.getUnapprovedDealers = async (req, res, next) => {
+module.exports.getUnapprovedDealers = async function (req, res) {
   try {
     const dealers = await DealerProfile.find({ adminApproved: false }).populate("dealer", "email phone");
     return res.status(200).json(new ApiResponse(200, "Unapproved dealers fetched", dealers));
@@ -19,7 +19,7 @@ exports.getUnapprovedDealers = async (req, res, next) => {
   }
 };
 
-exports.approveDealer = async (req, res, next) => {
+module.exports.approveDealer = async function (req, res) {
   try {
     const { id } = req.params;
     const profile = await DealerProfile.findById(id);

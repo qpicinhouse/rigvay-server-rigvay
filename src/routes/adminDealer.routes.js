@@ -3,10 +3,9 @@ const router = express.Router();
 const { param } = require("express-validator");
 
 
-const controller = require("../controllers/adminDealer.controller");
+const {getAllDealers , getUnapprovedDealers, approveDealer } = require("../controllers/adminDealer.controller");
 
-router.get("/dealers", controller.getAllDealers);
-router.get("/dealers-unapproved", controller.getUnapprovedDealers);
-router.post("/dealer-approve/:id", [param("id").isMongoId().withMessage("Invalid dealer profile id")],controller.approveDealer);
-
+router.get("/dealers", getAllDealers);
+router.get("/dealers-unapproved", getUnapprovedDealers);
+router.post("/dealer-approve/:id", [param("id").isMongoId().withMessage("Invalid dealer profile id")],approveDealer);
 module.exports = router;
