@@ -32,7 +32,7 @@ exports.getCarsByCarID = async (req, res) => {
       });
     }
 
-    res.json({ success: true, data: car});
+    res.json({ success: true, data: car });
 
   } catch (error) {
     console.error(error);
@@ -75,7 +75,7 @@ exports.addCar = async (req, res) => {
 
 exports.updateCar = async (req, res) => {
   try {
-    console.log(req.body);
+    console.log("Update request body:", req.body);
 
     const car = await Car.findOne({
       _id: req.params.carId,
@@ -90,47 +90,63 @@ exports.updateCar = async (req, res) => {
       });
     }
 
-    // 🔥 PARSE STRINGIFIED OBJECTS
+    // Parse stringified JSON fields
     const parsedBody = { ...req.body };
 
     const jsonFields = [
+      'location',
       'interiorEquipment',
       'exteriorEquipment',
       'environment',
-      'extras'
+      'extras',
+      'existingImages'
     ];
 
     jsonFields.forEach(field => {
       if (parsedBody[field] && typeof parsedBody[field] === 'string') {
-        parsedBody[field] = JSON.parse(parsedBody[field]);
+        try {
+          parsedBody[field] = JSON.parse(parsedBody[field]);
+        } catch (e) {
+          console.error(`Invalid JSON for ${field}:`, e);
+        }
       }
     });
 
+    // ✅ Direct assignment - no complex mapping needed!
     Object.assign(car, parsedBody);
 
-    // Images handling
+    // Handle images
     if (req.files?.length) {
-      const imgs = buildImages(req.files);
-      car.images = req.query.replaceImages === "true"
-        ? imgs
-        : [...car.images, ...imgs];
-
-      car.images.forEach((img, i) => (img.isPrimary = i === 0));
+      const newImages = buildImages(req.files);
+      
+      if (parsedBody.existingImages && Array.isArray(parsedBody.existingImages)) {
+        car.images = [...parsedBody.existingImages, ...newImages];
+      } else {
+        car.images = newImages;
+      }
+      
+      // Set first image as primary
+      car.images.forEach((img, i) => {
+        img.isPrimary = (i === 0);
+      });
+    } else if (parsedBody.existingImages && Array.isArray(parsedBody.existingImages)) {
+      car.images = parsedBody.existingImages;
     }
 
     await car.save();
 
     res.json({
       success: true,
-      car
+      message: "Car updated successfully",
+      data: car
     });
 
   } catch (error) {
     console.error("Update car error:", error);
-
     res.status(500).json({
       success: false,
-      message: "Server error"
+      message: "Server error",
+      error: error.message
     });
   }
 };

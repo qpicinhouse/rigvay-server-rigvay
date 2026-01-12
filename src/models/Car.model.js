@@ -53,65 +53,62 @@ const carSchema = new mongoose.Schema(
       }
     ],
 
-    equipment: {
-      interior: {
-        numberOfSeats: Number,
-        parkingSensors: Boolean,
-        interiorDesign: String,
-        climateControl: Boolean,
-        airbagType: String,
+    // ✅ FLATTENED STRUCTURE - matches frontend
+    interiorEquipment: {
+      numberOfSeats: Number,
+      parkingSensors: String,
+      interiorDesign: String,
+      climateControl: String,
+      airbags: Number,
+      airbagType: String,
+      tunerRadio: Boolean,
+      bluetooth: Boolean,
+      cdPlayer: Boolean,
+      mp3Interface: Boolean,
+      auxiliaryHeating: Boolean,
+      electricHeatedSeats: Boolean,
+      electricSideMirror: Boolean,
+      electricSeatAdjustment: Boolean,
+      startStopSystem: Boolean,
+      skiBag: Boolean,
+      rainSensor: Boolean,
+      powerSteering: Boolean,
+      onboardComputer: Boolean,
+      navigationSystem: Boolean,
+      cruiseControl: Boolean,
+      handsFreeKit: Boolean,
+      isofix: Boolean,
+      electricWindows: Boolean,
+      headUpDisplay: Boolean,
+      centralLocking: Boolean,
+      multifunctionSteeringWheel: Boolean
+    },
 
-        features: {
-          tunerRadio: Boolean,
-          bluetooth: Boolean,
-          cdPlayer: Boolean,
-          mp3Interface: Boolean,
-          electricHeatedSeats: Boolean,
-          electricSideMirror: Boolean,
-          electricSeatAdjustment: Boolean,
-          startStopSystem: Boolean,
-          skiBag: Boolean,
-          rainSensor: Boolean,
-          powerSteering: Boolean,
-          onboardComputer: Boolean,
-          navigationSystem: Boolean,
-          cruiseControl: Boolean,
-          handsFreeKit: Boolean,
-          isofix: Boolean,
-          electricWindows: Boolean,
-          headUpDisplay: Boolean,
-          centralLocking: Boolean,
-          multifunctionSteeringWheel: Boolean
-        }
-      },
-
-      exterior: {
-        sunroof: Boolean,
-        roofRack: Boolean,
-        panoramicRoof: Boolean,
-        metallicExterior: Boolean,
-        alloyWheels: Boolean,
-        trailerCoupling: Boolean
-      }
+    exteriorEquipment: {
+      sunroof: Boolean,
+      roofRack: Boolean,
+      panoramicRoof: Boolean,
+      metallicExterior: Boolean,
+      alloyWheels: Boolean,
+      trailerCoupling: Boolean
     },
 
     environment: {
       fuelConsumption: String,
       emissionSticker: String,
       emissionClass: String,
-
-      safety: {
-        abs: Boolean,
-        esp: Boolean,
-        tractionControl: Boolean,
-        immobilizer: Boolean,
-        xenonHeadlights: Boolean,
-        fogLamp: Boolean,
-        daytimeRunningLights: Boolean,
-        adaptiveLighting: Boolean,
-        fourWheelDrive: Boolean,
-        particulateFilter: Boolean
-      }
+      roofBars: Boolean,
+      esp: Boolean,
+      lightSensor: Boolean,
+      xenonHeadlights: Boolean,
+      immobilizer: Boolean,
+      daytimeRunningLights: Boolean,
+      adaptiveLighting: Boolean,
+      fourWheelDrive: Boolean,
+      tractionControl: Boolean,
+      particleFilter: Boolean,
+      fogLamp: Boolean,
+      abs: Boolean
     },
 
     extras: {
