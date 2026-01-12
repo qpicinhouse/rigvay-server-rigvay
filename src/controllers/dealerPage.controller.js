@@ -11,11 +11,12 @@ module.exports.getPage = async function getPage(req, res, next) {
             return res.status(401).json(new ApiResponse(401, "Unauthorized", null));
         }
         // Dealer basic info
-        const dealerData = await DealerProfile.findOne({ dealer: dealerId }).select("firstName lastName companyName rigvay_id phone companyWhatsapp addressLine1 addressLine2 addressLine3 district state pincode");
+        const dealerData = await DealerProfile.findOne({ dealer: dealerId }).select("firstName lastName companyName rigvay_id phone companyWhatsapp addressLine1 addressLine2 addressLine3 district state pincode profileImageUrl");
 
         const dealerPageData = await DealerPage.findOne({ dealer: dealerId }).select("bannerOneUrl bannerTwoUrl");
         const response = {
             name: `${dealerData.firstName} ${dealerData.lastName}`,
+            companyLogoUrl: dealerData.profileImageUrl,
             companyName: dealerData.companyName,
             rigvayId: dealerData.rigvay_id,
             mobileNumber: dealerData.phone,
