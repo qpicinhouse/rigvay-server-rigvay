@@ -22,7 +22,8 @@ module.exports.register = async function register(req, res) {
     }
 
     const otp = generateOTP();
-    const tempDealer = new DealerOTP({email,phone,password: passwordHash,otp,otpExpires: otpExpiry(1)});
+    const passwordHash = await hashPassword(password);
+    const tempDealer = new DealerOTP({email,phone,password: passwordHash,otp,otpExpires: otpExpiry(3)});
     await tempDealer.save();
 
     await sendOTPViaDLT(phone, otp);
@@ -154,7 +155,7 @@ module.exports.sendLoginOTP = async function sendLoginOTP(req, res) {
 
     const otp = generateOTP();
     dealer.otp = otp;
-    dealer.otpExpires = otpExpiry(1);
+    dealer.otpExpires = otpExpiry(3);
     await dealer.save();
     await sendOTPViaDLT(phone, otp);
 
