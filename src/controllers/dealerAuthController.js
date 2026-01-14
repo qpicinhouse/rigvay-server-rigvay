@@ -14,15 +14,16 @@ module.exports.register = async function register(req, res) {
       return res.status(400).json(new ApiResponse(400, "Missing fields", ''));
     }
 
-    const exists = await Dealer.findOne({ $or: [{ email }, { phone }] }) || await DealerOTP.findOne({ $or: [{ email }, { phone }] });
+    const exists = await Dealer.findOne({ $or: [{ email }, { phone }] });
     if (exists) {
       return res.status(409).json(
-        new ApiResponse(409, "Email or phone already in use resister After 1 Min ", "")
+        new ApiResponse(409, "Email or phone already registered", "")
       );
     }
 
     const otp = generateOTP();
-    const tempDealer = new DealerOTP({email,phone,password: passwordHash,otp,otpExpires: otpExpiry(1)});
+    const passwordHash = await hashPassword(password);
+    const tempDealer = new DealerOTP({email,phone,password: passwordHash,otp,otpExpires: otpExpiry(3)});
     await tempDealer.save();
 
     await sendOTPViaDLT(phone, otp);
@@ -41,7 +42,7 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
       return res.status(400).json(new ApiResponse(400, "Missing phone or otp", ''));
     }
 
-    const tempDealer = await TempDealer.findOne({ phone });
+    const tempDealer = await DealerOTP.findOne({ phone });
     if (!tempDealer) {
       return res.status(404).json( new ApiResponse(404, "Registration not found", ""));
     }
@@ -50,7 +51,7 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
     //  if (!dealer.otp || !dealer.otpExpires || new Date() > dealer.otpExpires)
       //
     if (new Date() > tempDealer.otpExpires) {
-      await TempDealer.deleteOne({ _id: tempDealer._id });
+      await DealerOTP.deleteOne({ _id: tempDealer._id });
       return res.status(400).json(new ApiResponse(400, "OTP expired. Please register again.", ""));
     }
 
@@ -77,7 +78,7 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
       },
       'dealer' // Add userType here
     );
-    await TempDealer.deleteOne({ _id: tempDealer._id });
+    await DealerOTP.deleteOne({ _id: tempDealer._id });
     return res.status(200).json(new ApiResponse(200, "Registration successful", {
       token,
       user: {
@@ -154,7 +155,7 @@ module.exports.sendLoginOTP = async function sendLoginOTP(req, res) {
 
     const otp = generateOTP();
     dealer.otp = otp;
-    dealer.otpExpires = otpExpiry(1);
+    dealer.otpExpires = otpExpiry(3);
     await dealer.save();
     await sendOTPViaDLT(phone, otp);
 
