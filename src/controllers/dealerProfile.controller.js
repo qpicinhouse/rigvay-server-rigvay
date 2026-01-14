@@ -10,7 +10,8 @@ function generateRegvayId() {
 
 module.exports.createDealerProfile = async function dealerProfile(req, res, next) {
   try {
-    const dealerId = req.dealer.id;
+    const dealerId = req.user.id;
+    console.log("dealerId", req.user || req.dealer);
     const payload = req.body || {};
 
     const dealer = await Dealer.findById(dealerId);
@@ -120,7 +121,7 @@ module.exports.getDealerProfile = async function getDealerProfile(req, res, next
     if (!dealer) return res.status(404).json(new ApiResponse(404, 'Dealer not found'));
 
     const profile = await DealerProfile.findOne({ dealer: dealerId });
-    if (!profile) return res.status(404).json(new ApiResponse(404, 'Dealer profile not found'));
+    if (!profile) return res.status(201).json(new ApiResponse(404, 'Dealer profile not found'));
 
     const subscription = await Subscription.findOne({ dealer: dealer._id, active: true });
 

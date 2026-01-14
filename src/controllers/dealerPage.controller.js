@@ -12,7 +12,7 @@ module.exports.getPage = async function getPage(req, res, next) {
         }
         // Dealer basic info
         const dealerData = await DealerProfile.findOne({ dealer: dealerId }).select("firstName lastName companyName rigvay_id phone companyWhatsapp addressLine1 addressLine2 addressLine3 district state pincode profileImageUrl");
-
+        if(!dealerData) return res.status(201).json(new ApiResponse(404, "Dealer profile is not updated"));
         const dealerPageData = await DealerPage.findOne({ dealer: dealerId }).select("bannerOneUrl bannerTwoUrl");
         const response = {
             name: `${dealerData.firstName} ${dealerData.lastName}`,
