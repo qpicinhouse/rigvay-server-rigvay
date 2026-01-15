@@ -1,5 +1,7 @@
 const Car = require('../models/Car.model');
 const Subscription = require('../models/subscription.model');
+const { uploadOnCloudinary } = require("../utils/cloudinary");
+
 
 const buildImages = (files = []) =>
   files.map((file, index) => ({
@@ -61,11 +63,20 @@ exports.addCar = async (req, res) => {
     if (count >= subscription.carLimit)
       return res.status(403).json({ success: false, message: "Car limit reached" });
   }
+  let imageUrls = [];
 
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const uploaded = await uploadOnCloudinary(file.path);
+        if (uploaded?.secure_url) {
+          imageUrls.push(uploaded.secure_url);
+        }
+      }
+    }
   const car = new Car({
     dealer: dealerId,
     ...req.body,
-    images: req.files?.length ? buildImages(req.files) : [],
+    images: imageUrls,
     status: "review"
   });
 
@@ -111,26 +122,27 @@ exports.updateCar = async (req, res) => {
         }
       }
     });
-
+    const existingImages = parsedBody.existingImages;
+    delete parsedBody.existingImages;
     // ✅ Direct assignment - no complex mapping needed!
     Object.assign(car, parsedBody);
+    let imageUrls = [];
 
-    // Handle images
-    if (req.files?.length) {
-      const newImages = buildImages(req.files);
-      
-      if (parsedBody.existingImages && Array.isArray(parsedBody.existingImages)) {
-        car.images = [...parsedBody.existingImages, ...newImages];
-      } else {
-        car.images = newImages;
+      if (req.files?.length) {
+        for (const file of req.files) {
+          const uploaded = await uploadOnCloudinary(file.path);
+          if (uploaded?.secure_url) {
+            imageUrls.push(uploaded.secure_url); // index preserved
+          }
+        }
       }
-      
-      // Set first image as primary
-      car.images.forEach((img, i) => {
-        img.isPrimary = (i === 0);
-      });
-    } else if (parsedBody.existingImages && Array.isArray(parsedBody.existingImages)) {
-      car.images = parsedBody.existingImages;
+    // Handle images
+    if (imageUrls.length && Array.isArray(existingImages)) {
+      car.images = [...existingImages, ...imageUrls];
+    } else if (imageUrls.length) {
+      car.images = imageUrls;
+    } else if (Array.isArray(existingImages)) {
+      car.images = existingImages;
     }
 
     await car.save();
