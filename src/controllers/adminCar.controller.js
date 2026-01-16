@@ -20,6 +20,7 @@ module.exports.getAllCars = async function getAllCars(req, res) {
             location: 1,
             images: 1,
             status: 1,
+            createdAt: 1
         })
         .populate("dealer", "firstName lastName rigvay_id")
         .sort({ createdAt: -1 });
@@ -52,7 +53,8 @@ module.exports.getUnapprovedCars = async function getUnapprovedCars(req, res) {
             ownerType: 1,
             location: 1,
             images: 1,
-            status: 1
+            status: 1,
+            createdAt: 1
         })
         .populate("dealer", "firstName lastName rigvay_id")
         .sort({ createdAt: -1 });
