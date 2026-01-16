@@ -109,7 +109,7 @@ module.exports.loginWithEmail = async function loginWithEmail(req, res) {
 
     const ok = await comparePassword(password, dealer.password);
     if (!ok) {
-      return res.status(401).json(new ApiResponse(401, "Invalid credentials", ''));
+      return res.status(201).json(new ApiResponse(201, "Invalid credentials", ''));
     }
 
     // Check if profile exists
@@ -145,12 +145,12 @@ module.exports.sendLoginOTP = async function sendLoginOTP(req, res) {
   try {
     const { phone } = req.body;
     if (!phone) {
-      return res.status(400).json(new ApiResponse(400, "Missing phone", ''));
+      return res.status(201).json(new ApiResponse(201, "Missing phone", ''));
     }
 
     const dealer = await Dealer.findOne({ phone });
     if (!dealer) {
-      return res.status(404).json(new ApiResponse(404, "Dealer not found", ''));
+      return res.status(204).json(new ApiResponse(204, "Dealer not found", ''));
     }
 
     const otp = generateOTP();
@@ -170,12 +170,12 @@ module.exports.verifyLoginOTP = async function verifyLoginOTP(req, res) {
   try {
     const { phone, otp } = req.body;
     if (!phone || !otp) {
-      return res.status(400).json(new ApiResponse(400, "Missing phone or otp", ''));
+      return res.status(201).json(new ApiResponse(201, "Missing phone or otp", ''));
     }
 
     const dealer = await Dealer.findOne({ phone });
     if (!dealer) {
-      return res.status(404).json(new ApiResponse(404, "Dealer not found", ''));
+      return res.status(204).json(new ApiResponse(204, "Dealer not found", ''));
     }
 
     if (!dealer.otp || !dealer.otpExpires || new Date() > dealer.otpExpires) {
