@@ -45,13 +45,10 @@ const carSchema = new mongoose.Schema(
 
     description: { type: String, maxlength: 2000 },
 
-    images: [
-      {
-        url: { type: String, required: true },
-        isPrimary: { type: Boolean, default: false },
-        uploadedAt: { type: Date, default: Date.now }
-      }
-    ],
+    images: {
+    type: [String], // Cloudinary URLs
+      default: []
+    },
 
     // ✅ FLATTENED STRUCTURE - matches frontend
     interiorEquipment: {
