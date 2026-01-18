@@ -14,6 +14,7 @@ const adminRoutes = require("./routes/admin.routes");
 const adminDealerRoutes = require("./routes/adminDealer.routes");
 const dealerPageRoutes = require("./routes/dealerPage.routes");
 const adminCarsRoutes = require("./routes/adminCars.routes");
+const searchPageRoutes = require("./routes/searchPage.routes");
 const app = express();
 
 // Global middlewares
@@ -36,6 +37,7 @@ app.use('/api/dealer', dealerPageRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin', adminDealerRoutes);
 app.use('/api/admin', adminCarsRoutes);
+app.use('/api/cars/', searchPageRoutes);
 app.get('/home', (req, res) => {
   console.log("hello");
   res.send("hello Andro How's it going?");
