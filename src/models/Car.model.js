@@ -8,7 +8,7 @@ const carSchema = new mongoose.Schema(
       required: true,
       index: true
     },
-
+    carId: { type: String, unique: true, required: true },
     brand: { type: String, required: true },
     model: { type: String, required: true },
     year: { type: Number, required: true },
