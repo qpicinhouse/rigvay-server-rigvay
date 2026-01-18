@@ -1,12 +1,14 @@
 const Counter = require("../models/counter.model");
 
-async function generateCarId() {
+async function generateId(type) {
   const now = new Date();
 
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
-  const key = `car_${year}_${month}_${day}`;
+  //const key = `car_${year}_${month}_${day}`;
+
+  const key = `${type}_${year}_${month}_${day}`;
 
   const counter = await Counter.findOneAndUpdate(
     { key },
@@ -14,7 +16,7 @@ async function generateCarId() {
     { new: true, upsert: true }
   );
   const number = String(counter.seq).padStart(3, "0");
-  return `RIV${year}${month}${day}${number}`;
+  return `RIV${type.toUpperCase()}${year}${month}${day}${number}`;
 }
 
-module.exports = generateCarId;
+module.exports = generateId;

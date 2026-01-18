@@ -1,7 +1,7 @@
 const Car = require('../models/Car.model');
 const Subscription = require('../models/subscription.model');
 const { uploadOnCloudinary } = require("../utils/cloudinary");
-const generateCarId = require("../utils/generateCarId");
+const generateId = require("../utils/generateUniqueId");
 
 
 const buildImages = (files = []) =>
@@ -74,7 +74,7 @@ exports.addCar = async (req, res) => {
         }
       }
     }
-    const carId = await generateCarId();
+    const carId = await generateId("car");
   const car = new Car({
     carId,
     dealer: dealerId,
