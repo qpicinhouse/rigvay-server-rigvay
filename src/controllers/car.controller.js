@@ -11,13 +11,34 @@ const buildImages = (files = []) =>
   }));
 
 exports.getCars = async (req, res) => {
-  const cars = await Car.find({
-    dealer: req.user.id,
-    isDeleted: false
-  }).sort({ createdAt: -1 });
+  const page = parseInt(req.query.page) || 1;
+  const limit = 2;
+  const skip = (page - 1) * limit;
 
-  res.json({ success: true, cars });
+  const baseQuery = {
+    dealer: req.user.id,
+    isDeleted: false,
+  };
+
+  const totalCars = await Car.countDocuments(baseQuery);
+  const totalPages = Math.ceil(totalCars / limit);
+  const remainingPages = totalPages - page;
+
+  const cars = await Car.find(baseQuery)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  res.json({
+    success: true,
+    cars,
+    page,
+    totalPages,
+    remainingPages,
+    hasMore: page < totalPages,
+  });
 };
+
 exports.getCarsByCarID = async (req, res) => {
   try {
     const { carId } = req.params;
