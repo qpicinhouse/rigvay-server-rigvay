@@ -47,6 +47,10 @@ app.get('/home', (req, res) => {
   console.log("hello");
   res.send("hello Andro How's it going?");
 });
+app.get('/api/home', (req, res) => {
+  console.log("hello");
+  res.send("hello Andro How's it in real life?");
+});
 
 
 
