@@ -21,10 +21,10 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: [
-    "http://localhost:3000",
-    "*",
+    "http://localhost:5173",
+    "http://localhost",
     "http://43.205.229.172",
-    "http://43.205.229.172:3000"
+    "http://43.205.229.172:5173"
   ],
   credentials: true
 }));
