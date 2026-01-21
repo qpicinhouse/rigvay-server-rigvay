@@ -20,7 +20,10 @@ const app = express();
 // Global middlewares
 app.use(helmet());
 app.use(cors({
-  origin: "*",
+  origin: [
+    "http://43.205.229.172",
+    "http://43.205.229.172:80"
+  ],
   credentials: true
 }));
 app.use(express.json());
