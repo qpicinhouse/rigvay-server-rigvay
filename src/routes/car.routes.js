@@ -8,12 +8,13 @@ const {
   addCar,
   updateCar,
   deleteCar,
-  getCarsByCarID
+  getCarsByCarID,
+  getCarStats
 } = require("../controllers/car.controller");
 
 router.get("/cars", authMiddleware, getCars);
+router.get("/cars/statistics", authMiddleware, getCarStats);
 router.get("/cars/:carId", authMiddleware, getCarsByCarID);
-
 router.post(
   "/cars",
   authMiddleware,

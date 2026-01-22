@@ -38,6 +38,42 @@ exports.getCars = async (req, res) => {
     hasMore: page < totalPages,
   });
 };
+exports.getCarStats = async (req, res) => {
+  try {
+    const dealerId = req.user.id;
+    // console.log('Dealer ID:', dealerId);
+
+    // Base query - works with both ObjectId and string
+    const baseQuery = {
+      dealer: dealerId,
+      isDeleted: false
+    };
+
+    // Count cars by status using simple queries
+    const [total, live, review, sold] = await Promise.all([
+      Car.countDocuments(baseQuery),
+      Car.countDocuments({ ...baseQuery, status: 'live' }),
+      Car.countDocuments({ ...baseQuery, status: 'review' }),
+      Car.countDocuments({ ...baseQuery, status: 'sold' })
+    ]);
+
+    // console.log('Stats:', { total, live, review, sold });
+
+    res.json({
+      success: true,
+      stats: { total, live, review, sold }
+    });
+
+  } catch (error) {
+    console.error("Car stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch car stats",
+      error: error.message
+    });
+  }
+};
+
 
 exports.getCarsByCarID = async (req, res) => {
   try {
@@ -87,15 +123,15 @@ exports.addCar = async (req, res) => {
   }
   let imageUrls = [];
 
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const uploaded = await uploadOnCloudinary(file.path);
-        if (uploaded?.secure_url) {
-          imageUrls.push(uploaded.secure_url);
-        }
+  if (req.files && req.files.length > 0) {
+    for (const file of req.files) {
+      const uploaded = await uploadOnCloudinary(file.path);
+      if (uploaded?.secure_url) {
+        imageUrls.push(uploaded.secure_url);
       }
     }
-    const carId = await generateId("car");
+  }
+  const carId = await generateId("car");
   const car = new Car({
     carId,
     dealer: dealerId,
@@ -152,14 +188,14 @@ exports.updateCar = async (req, res) => {
     Object.assign(car, parsedBody);
     let imageUrls = [];
 
-      if (req.files?.length) {
-        for (const file of req.files) {
-          const uploaded = await uploadOnCloudinary(file.path);
-          if (uploaded?.secure_url) {
-            imageUrls.push(uploaded.secure_url); // index preserved
-          }
+    if (req.files?.length) {
+      for (const file of req.files) {
+        const uploaded = await uploadOnCloudinary(file.path);
+        if (uploaded?.secure_url) {
+          imageUrls.push(uploaded.secure_url); // index preserved
         }
       }
+    }
     // Handle images
     if (imageUrls.length && Array.isArray(existingImages)) {
       car.images = [...existingImages, ...imageUrls];
