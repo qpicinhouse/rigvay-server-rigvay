@@ -29,6 +29,7 @@ app.use(cors({
     "http://localhost:5173",
     'http://localhost:3000',
     'http://localhost:3001',
+    "https://rigvay-admin.vercel.app",
     "https://rigvay.com"
   ],
   credentials: true,
