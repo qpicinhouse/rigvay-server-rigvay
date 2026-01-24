@@ -27,6 +27,8 @@ app.use(cors({
   origin: [
     "http://43.205.229.172",
     "http://localhost:5173",
+    'http://localhost:3000',
+    'http://localhost:3001',
     "https://rigvay.com"
   ],
   credentials: true,

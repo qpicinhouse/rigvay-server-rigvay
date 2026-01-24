@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const Plan = require('../src/models/Plan.model');
-require('dotenv').config();
+
+require('dotenv').config({ path: '../.env' });
+
+console.log('MONGO_URI:', process.env.MONGO_URI);
+
 
 const plans = [
   {
@@ -79,6 +83,21 @@ const plans = [
       'Hassle free for a Year',
       'Unlimited Car Listings',
       'Seller Leads'
+    ]
+  },
+  {
+    name: 'Free Trial',
+    amount: 0,
+    displayAmount: 'Free / 48h',
+    durationMonths: 0.066,
+    carLimit: 1,
+    unlimited: false,
+    discount: 0,
+    discountText: '0% OFF | 0% OFF | 0% OFF |',
+    features: [
+      'Validity : 48h',
+      'Hassle free for few hours',
+      '1 Car Listings',
     ]
   }
 ];

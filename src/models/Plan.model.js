@@ -6,7 +6,7 @@ const planSchema = new mongoose.Schema(
       type: String, 
       required: true, 
       unique: true,
-      enum: ['Starter', 'Pro', 'Max', 'Ultra', 'Ultra Max']
+      enum: ['Free Trial', 'Starter', 'Pro', 'Max', 'Ultra', 'Ultra Max']
     },
     amount: { type: Number, required: true },
     durationMonths: { type: Number, required: true },
