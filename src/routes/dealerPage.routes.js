@@ -2,7 +2,7 @@ const express = require("express");
 //const multer = require('multer');
 
 const router = express.Router();
-const upload = require("../middlewares/multer.middleware");
+const { upload, compressImages } = require("../middlewares/multer.middleware");
 const {authMiddleware} = require("../middlewares/auth.middleware");
 const {getPage, updatePage} = require("../controllers/dealerPage.controller");
 

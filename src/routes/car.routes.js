@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { authMiddleware } = require("../middlewares/auth.middleware");
-const upload = require("../middlewares/multer.middleware");
+const { upload, compressImages } = require("../middlewares/multer.middleware");
+
 
 const {
   getCars,
@@ -18,6 +19,7 @@ router.get("/cars/:carId", authMiddleware, getCarsByCarID);
 router.post(
   "/cars",
   authMiddleware,
+   compressImages,
   upload.array("images", 10),
   addCar
 );
@@ -25,6 +27,7 @@ router.post(
 router.put(
   "/cars/:carId",
   authMiddleware,
+   compressImages,
   upload.array("images", 10),
   updateCar
 );
