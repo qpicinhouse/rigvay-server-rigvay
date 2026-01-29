@@ -19,16 +19,16 @@ router.get("/cars/:carId", authMiddleware, getCarsByCarID);
 router.post(
   "/cars",
   authMiddleware,
-   compressImages,
   upload.array("images", 10),
+  compressImages,
   addCar
 );
 
 router.put(
   "/cars/:carId",
   authMiddleware,
-   compressImages,
   upload.array("images", 10),
+  compressImages,
   updateCar
 );
 
