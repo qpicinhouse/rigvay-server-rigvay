@@ -9,7 +9,6 @@ const dealerProfileSchema = new mongoose.Schema(
       unique: true,
     },
     // unique rigvay id (10 digits)
-    rigvay_id: { type: String, unique: true, sparse: true },
     profileImageUrl: { type: String },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
