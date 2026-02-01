@@ -12,7 +12,7 @@ module.exports.getPage = async function getPage(req, res, next) {
             return res.status(401).json(new ApiResponse(401, "Unauthorized", null));
         }
         // Dealer basic info
-        const dealerData = await DealerProfile.findOne({ dealer: dealerId }).select("firstName lastName companyName phone companyWhatsapp addressLine1 addressLine2 addressLine3 district state pincode profileImageUrl");
+        const dealerData = await DealerProfile.findOne({ dealer: dealerId }).select("profileImageUrl firstName lastName companyName phone companyWhatsapp addressLine1 addressLine2 addressLine3 district state pincode profileImageUrl");
         if(!dealerData) return res.status(201).json(new ApiResponse(404, "Dealer profile is not updated"));
         const dealerPageData = await DealerPage.findOne({ dealer: dealerId }).select("bannerOneUrl bannerTwoUrl");
         const response = {
