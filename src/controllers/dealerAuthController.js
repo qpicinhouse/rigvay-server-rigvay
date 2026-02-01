@@ -87,7 +87,8 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
         id: dealer._id,
         email: dealer.email,
         phone: dealer.phone,
-        hasProfile
+        hasProfile,
+        rigvay_id: dealer.rigvay_id
       }
     }));
 
@@ -123,7 +124,8 @@ module.exports.loginWithEmail = async function loginWithEmail(req, res) {
       { 
         id: dealer._id, 
         email: dealer.email, 
-        phone: dealer.phone 
+        phone: dealer.phone,
+        rigvay_id: dealer.rigvay_id
       },
       'dealer' // Add userType here
     );
@@ -134,7 +136,8 @@ module.exports.loginWithEmail = async function loginWithEmail(req, res) {
         id: dealer._id,
         email: dealer.email,
         phone: dealer.phone,
-        hasProfile
+        hasProfile,
+        rigvay_id: dealer.rigvay_id
       }
     }));
   } catch (err) {
@@ -204,7 +207,8 @@ module.exports.verifyLoginOTP = async function verifyLoginOTP(req, res) {
       { 
         id: dealer._id, 
         email: dealer.email, 
-        phone: dealer.phone 
+        phone: dealer.phone,
+        rigvay_id: dealer.rigvay_id
       },
       'dealer' // Add userType here
     );
@@ -215,7 +219,8 @@ module.exports.verifyLoginOTP = async function verifyLoginOTP(req, res) {
         id: dealer._id,
         email: dealer.email,
         phone: dealer.phone,
-        hasProfile
+        hasProfile,
+        rigvay_id: dealer.rigvay_id
       }
     }));
   } catch (err) {
