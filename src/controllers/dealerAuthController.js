@@ -6,6 +6,7 @@ const { ApiResponse } = require("../utils/ApiResponse");
 const { generateAccessToken } = require("../utils/token");
 const { hashPassword, comparePassword } = require("../utils/hash");
 const DealerProfile = require("../models/dealerProfile.model");
+const generateId = require("../utils/generateUniqueId");
 
 module.exports.register = async function register(req, res) {
   try {
@@ -59,7 +60,7 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
       return res.status(400).json(new ApiResponse(400,"Invalid OTP.", ''));
     }
     // Move to Dealer collection 
-    const dealer = new Dealer({email: tempDealer.email, phone: tempDealer.phone, password: tempDealer.password});
+    const dealer = new Dealer({email: tempDealer.email, phone: tempDealer.phone, password: tempDealer.password, rigvay_id: await generateId("dealer")});
     dealer.otp = undefined;
     dealer.otpExpires = undefined;
     await dealer.save();
@@ -74,7 +75,8 @@ module.exports.verifyRegistrationOTP = async function verifyRegistrationOTP(req,
       { 
         id: dealer._id, 
         email: dealer.email, 
-        phone: dealer.phone 
+        phone: dealer.phone ,
+        rigvay_id: dealer.rigvay_id
       },
       'dealer' // Add userType here
     );

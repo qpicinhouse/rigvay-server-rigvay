@@ -3,7 +3,6 @@ const DealerProfile = require("../models/dealerProfile.model");
 const Subscription = require("../models/subscription.model");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
 const { ApiResponse } = require("../utils/ApiResponse");
-const generateId = require("../utils/generateUniqueId");
 function generateRegvayId() {
   return Math.floor(1000000000 + Math.random() * 9000000000).toString();
 }
@@ -28,12 +27,7 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
       }
     }
 
-    // ensure rigvay_id on profile
-     if (!profile.rigvay_id){     
-       // const exists = await DealerProfile.findOne({ rigvay_id: id });
-       // if (!exists) {  
-            profile.rigvay_id = await generateId('dealer');
-        //}
+    
     // Map allowed flat fields from payload into profile (model uses flat address fields)
     const fields = [
       "firstName",
@@ -89,7 +83,7 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
         .json(
           new ApiResponse(400, "Missing required profile fields", { missing })
         );
-    }
+    
     }
     
     await profile.save();
