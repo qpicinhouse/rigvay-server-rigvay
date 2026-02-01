@@ -22,7 +22,7 @@ module.exports.getSearchResults = async (req, res) => {
             alloyWheels,
             sort,
             page = 1,
-            limit = 20
+            limit = 4
         } = req.query;
 
         /* ---------------- PAGINATION ---------------- */
