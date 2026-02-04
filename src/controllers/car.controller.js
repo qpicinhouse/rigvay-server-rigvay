@@ -3,6 +3,7 @@ const Subscription = require('../models/subscription.model');
 const { uploadOnCloudinary } = require("../utils/cloudinary");
 const generateId = require("../utils/generateUniqueId");
 const DealerProfile = require('../models/dealerProfile.model');
+const Dealer = require('../models/dealer.model');
 
 
 const buildImages = (files = []) =>
@@ -255,8 +256,9 @@ exports.getSingleCarsByCarID = async (req, res) => {
     }
     const dealer_id =  car.dealer || null;
     const dealerProfile = await DealerProfile.findOne({dealer: car.dealer });
+    const rigvay_id = await Dealer.findOne({_id: dealer_id}).select('rigvay_id'); //rigvay_id
     
-    res.json({ success: true, message: 'Car retrieved successfully', data: {car : car, dealerProfile: dealerProfile} });
+    res.json({ success: true, message: 'Car retrieved successfully', data: {car : car, rigvay_id: rigvay_id, dealerProfile: dealerProfile} });
   } catch (error) {
     console.error(error);
     res.status(500).json({ 
