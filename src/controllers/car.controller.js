@@ -256,7 +256,7 @@ exports.getSingleCarsByCarID = async (req, res) => {
     }
     const dealer_id =  car.dealer || null;
     const dealerProfile = await DealerProfile.findOne({dealer: car.dealer });
-    const rigvay_id = await Dealer.findOne({_id: dealer_id}).select('rigvay_id'); //rigvay_id
+    const rigvay_id = (await Dealer.findById(dealer_id).select("rigvay_id"))?.rigvay_id; //rigvay_id
     
     res.json({ success: true, message: 'Car retrieved successfully', data: {car : car, rigvay_id: rigvay_id, dealerProfile: dealerProfile} });
   } catch (error) {
