@@ -61,6 +61,7 @@ app.use('/api/admin', adminDealerRoutes);
 app.use('/api/admin', adminCarsRoutes);
 app.use('/api/cars/', searchPageRoutes);
 app.use('/api/public/', dealerPageRoutes);
+app.use('/api/public/', carRoutes);
 app.get('/home', (req, res) => {
   res.send("hello Andro How's it going?");
 });

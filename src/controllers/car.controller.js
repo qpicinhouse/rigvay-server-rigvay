@@ -2,6 +2,8 @@ const Car = require('../models/Car.model');
 const Subscription = require('../models/subscription.model');
 const { uploadOnCloudinary } = require("../utils/cloudinary");
 const generateId = require("../utils/generateUniqueId");
+const DealerProfile = require('../models/dealerProfile.model');
+const Dealer = require('../models/dealer.model');
 
 
 const buildImages = (files = []) =>
@@ -237,4 +239,31 @@ exports.deleteCar = async (req, res) => {
   await car.save();
 
   res.json({ success: true });
+};
+
+
+//Public Controller to get Single Car by ID
+exports.getSingleCarsByCarID = async (req, res) => {
+  try {
+    const { carId } = req.params;
+    const car = await Car.findOne({ carId: carId });
+
+    if (!car) {
+      return res.status(202).json({
+        success: false, 
+        message: 'Car not found'
+      });
+    }
+    const dealer_id =  car.dealer || null;
+    const dealerProfile = await DealerProfile.findOne({dealer: car.dealer });
+    const rigvay_id = (await Dealer.findById(dealer_id).select("rigvay_id"))?.rigvay_id; //rigvay_id
+    
+    res.json({ success: true, message: 'Car retrieved successfully', data: {car : car, rigvay_id: rigvay_id, dealerProfile: dealerProfile} });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error' 
+    });
+  }
 };

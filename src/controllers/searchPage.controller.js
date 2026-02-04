@@ -32,11 +32,11 @@ module.exports.getSearchResults = async (req, res) => {
 
         /* ---------------- BASE FILTER ---------------- */
         let filter = {};
-        // temporary comment out to show all cars including non-live cars
-        // filter = {
-        //   status: "live",
-        //   isDeleted: false
-        // };
+        //temporary comment out to show all cars including non-live cars
+        filter = {
+          status: "live",
+          isDeleted: false
+        };
 
         /* ---------------- SEARCH ---------------- */
         if (search) {
