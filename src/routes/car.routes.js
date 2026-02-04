@@ -10,7 +10,8 @@ const {
   updateCar,
   deleteCar,
   getCarsByCarID,
-  getCarStats
+  getCarStats,
+  getSingleCarsByCarID
 } = require("../controllers/car.controller");
 
 router.get("/cars", authMiddleware, getCars);
@@ -33,5 +34,8 @@ router.put(
 );
 
 router.delete("/cars/:carId", authMiddleware, deleteCar);
+
+//Public  Routes for get Single Car and
+router.get("/cars/v1/:carId", getSingleCarsByCarID);
 
 module.exports = router;
