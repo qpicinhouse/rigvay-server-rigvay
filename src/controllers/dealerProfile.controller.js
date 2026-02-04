@@ -59,8 +59,6 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
     const requiredFields = [
       "firstName",
       "lastName",
-      "phone",
-      "email",
       "companyName",
       "companyPhone",
       "companyEmail",
@@ -154,7 +152,7 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
     });
 
     const requiredFields = [
-      'firstName','lastName','phone','email','companyName',
+      'firstName','lastName','companyName',
       'companyPhone','companyEmail','companyWhatsapp',
       'addressLine1','addressLine2','pincode','district','state'
     ];
