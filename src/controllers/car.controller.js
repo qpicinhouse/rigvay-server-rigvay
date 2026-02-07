@@ -246,7 +246,7 @@ exports.deleteCar = async (req, res) => {
 exports.getSingleCarsByCarID = async (req, res) => {
   try {
     const { carId } = req.params;
-    const car = await Car.findOne({ carId: carId });
+    const car = await Car.findOne({ _id: carId });
 
     if (!car) {
       return res.status(202).json({
