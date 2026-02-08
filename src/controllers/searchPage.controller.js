@@ -5,6 +5,7 @@ module.exports.getSearchResults = async (req, res) => {
     try {
         const {
             search,
+            brand,
             city,
             state,
             year,
@@ -45,7 +46,10 @@ module.exports.getSearchResults = async (req, res) => {
                 { model: { $regex: search, $options: "i" } }
             ];
         }
-
+         /* ---------------- BRAND ---------------- */
+        if (brand) {
+            filter.brand = { $regex: brand, $options: "i" };
+        }
         /* ---------------- LOCATION ---------------- */
         if (city) filter["location.city"] = { $regex: city, $options: "i" };
         if (state) filter["location.state"] = { $regex: state, $options: "i" };
