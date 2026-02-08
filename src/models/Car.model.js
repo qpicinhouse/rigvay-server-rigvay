@@ -34,10 +34,7 @@ const carSchema = new mongoose.Schema(
     representative: { type: String },
     businessPartner: { type: String },
 
-    location: {
-      state: String,
-      city: String
-    },
+    location: { type: String },
 
     doors: Number,
     interiorColor: String,
