@@ -6,12 +6,12 @@ module.exports.getSearchResults = async (req, res) => {
         const {
             search,
             brand,
-            city,
+            location,
             state,
             year,
             fuelType,
             transmission,
-            body,
+            type,
             minPrice,
             maxPrice,
             minMileage,
@@ -51,8 +51,8 @@ module.exports.getSearchResults = async (req, res) => {
             filter.brand = { $regex: brand, $options: "i" };
         }
         /* ---------------- LOCATION ---------------- */
-        if (city) filter["location.city"] = { $regex: city, $options: "i" };
-        if (state) filter["location.state"] = { $regex: state, $options: "i" };
+        if (location) filter["location"] = { $regex: location, $options: "i" };
+        // if (state) filter["location.state"] = { $regex: state, $options: "i" };
 
         /* ---------------- MODEL YEAR ---------------- */
         if (year) {
@@ -69,9 +69,9 @@ module.exports.getSearchResults = async (req, res) => {
             filter.transmission = { $in: transmission.split(",") };
         }
 
-        /* ---------------- BODY TYPE ---------------- */
-        if (body) {
-            filter.body = { $in: body.split(",") };
+        /* ---------------- Type TYPE ---------------- */
+        if (type) {
+            filter.type = { $in: type.split(",") };
         }
 
         /* ---------------- PRICE ---------------- */
