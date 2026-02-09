@@ -1,5 +1,7 @@
 const Car = require("../models/Car.model");
 const { ApiResponse } = require("../utils/ApiResponse");
+const caseInsensitiveIn = (value) =>
+  value.split(",").map(v => new RegExp(`^${v}$`, "i"));
 
 module.exports.getSearchResults = async (req, res) => {
     try {
@@ -61,17 +63,17 @@ module.exports.getSearchResults = async (req, res) => {
 
         /* ---------------- FUEL TYPE ---------------- */
         if (fuelType) {
-            filter.fuelType = { $in: fuelType.split(",") };
+            filter.fuelType = { $in: caseInsensitiveIn(fuelType) };
         }
 
         /* ---------------- TRANSMISSION ---------------- */
         if (transmission) {
-            filter.transmission = { $in: transmission.split(",") };
+            filter.transmission = { $in: caseInsensitiveIn(transmission) };
         }
 
         /* ---------------- Type TYPE ---------------- */
         if (type) {
-            filter.type = { $in: type.split(",") };
+            filter.type = { $in: caseInsensitiveIn(type) };
         }
 
         /* ---------------- PRICE ---------------- */
