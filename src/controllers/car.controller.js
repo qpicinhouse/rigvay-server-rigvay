@@ -246,24 +246,40 @@ exports.deleteCar = async (req, res) => {
 exports.getSingleCarsByCarID = async (req, res) => {
   try {
     const { carId } = req.params;
-    const car = await Car.findOne({ _id: carId });
+    const car = await Car.findOne({ _id: carId, isDeleted: false });
 
     if (!car) {
-      return res.status(202).json({
-        success: false, 
-        message: 'Car not found'
+      return res.status(404).json({
+        success: false,
+        message: "Car not found",
       });
     }
-    const dealer_id =  car.dealer || null;
-    const dealerProfile = await DealerProfile.findOne({dealer: car.dealer });
-    const rigvay_id = (await Dealer.findById(dealer_id).select("rigvay_id"))?.rigvay_id; //rigvay_id
-    
-    res.json({ success: true, message: 'Car retrieved successfully', data: {car : car, rigvay_id: rigvay_id, dealerProfile: dealerProfile} });
+
+    const dealer_id = car.dealer;
+
+    const dealerProfile = await DealerProfile.findOne({ dealer: dealer_id });
+    const dealerData = await Dealer.findById(dealer_id).select("rigvay_id");
+    const rigvay_id = dealerData?.rigvay_id || null;
+    const dealerCars = await Car.find({
+      dealer: dealer_id,
+      isDeleted: false,
+      _id: { $ne: carId },
+    }).sort({ createdAt: -1 });
+    res.json({
+      success: true,
+      message: "Car retrieved successfully",
+      data: {
+        car,
+        rigvay_id,
+        dealerProfile,
+        dealerCars,
+      },
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error' 
+    res.status(500).json({
+      success: false,
+      message: "Server error",
     });
   }
 };
