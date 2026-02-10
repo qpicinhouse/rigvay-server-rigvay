@@ -16,7 +16,7 @@ const adminDealerRoutes = require("./routes/adminDealer.routes");
 const dealerPageRoutes = require("./routes/dealerPage.routes");
 const adminCarsRoutes = require("./routes/adminCars.routes");
 const searchPageRoutes = require("./routes/searchPage.routes");
-
+const userAuthRoutes = require("./routes/userAuthRoutes.routes");
 const { razorpayWebhook } = require("./controllers/razorpayWebhook.controller"); 
 
 const app = express();
@@ -52,6 +52,7 @@ app.use(cookieParser());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use('/api/auth-dealer', dealerAuthRoutes);
+app.use('/api/auth-user', userAuthRoutes);
 app.use('/api/dealer', dealerProfileRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/dealer', carRoutes);
