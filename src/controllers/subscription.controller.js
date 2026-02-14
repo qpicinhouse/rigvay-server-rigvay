@@ -1,6 +1,7 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Plan = require('../models/Plan.model');
+const { calculatePlanEndDate } = require('../utils/dateUtils');
 const Subscription = require('../models/subscription.model');
 const Dealer = require('../models/dealer.model');
 const DealerProfile = require('../models/dealerProfile.model');
@@ -21,9 +22,9 @@ exports.getPlans = async (req, res) => {
 };
 
 exports.getCurrentSubscription = async (req, res) => {
-    try {;
+  try {
     const dealerId = req.user.id;
-    
+
     const subscription = await Subscription.findOne({
       dealer: dealerId,
       active: true,
@@ -193,8 +194,7 @@ exports.createOrder = async (req, res) => {
 
     // 🔥 PRE-CREATE SUBSCRIPTION (PENDING)
     const startDate = new Date();
-    const endDate = new Date();
-    endDate.setMonth(endDate.getMonth() + plan.durationMonths);
+    const endDate = calculatePlanEndDate(startDate, plan.durationMonths);
 
     await Subscription.create({
       dealer: dealerId,
@@ -410,7 +410,7 @@ exports.checkCarLimit = async (req, res) => {
     }
 
     const Car = require('../models/Car.model');
-    const currentCarCount = await Car.countDocuments({ 
+    const currentCarCount = await Car.countDocuments({
       dealer: dealerId,
       isDeleted: { $ne: true }
     });

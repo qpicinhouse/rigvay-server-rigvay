@@ -2,6 +2,7 @@ const DealerProfile = require("../models/dealerProfile.model");
 const Subscription = require("../models/subscription.model");
 const Plan = require("../models/Plan.model");
 const { ApiResponse } = require("../utils/ApiResponse");
+const { calculatePlanEndDate } = require("../utils/dateUtils");
 
 /* ---------------------------------------------------
    GET ALL DEALERS (with current subscription info)
@@ -100,8 +101,7 @@ module.exports.approveDealer = async (req, res) => {
 
     if (!alreadyUsedTrial) {
       const startDate = new Date();
-      const endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + freePlan.durationMonths);
+      const endDate = calculatePlanEndDate(startDate, freePlan.durationMonths);
 
       await Subscription.create({
         dealer: profile.dealer, // Dealer._id
@@ -199,8 +199,7 @@ module.exports.assignPlanToDealer = async (req, res) => {
 
     // 2️⃣ Create new subscription
     const startDate = new Date();
-    const endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + plan.durationMonths);
+    const endDate = calculatePlanEndDate(startDate, plan.durationMonths);
 
     const subscription = await Subscription.create({
       dealer: profile.dealer,
