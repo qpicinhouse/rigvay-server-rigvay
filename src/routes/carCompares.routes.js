@@ -3,6 +3,6 @@ const router = express.Router();
 
 const { compareCars } = require("../controllers/carCompares.controller");
 
-router.get("/compares", compareCars);
+router.post("/compares", compareCars);
 
 module.exports = router;
