@@ -9,35 +9,72 @@ const { calculatePlanEndDate } = require("../utils/dateUtils");
 --------------------------------------------------- */
 module.exports.getAllDealers = async (req, res) => {
   try {
-    const dealers = await DealerProfile.find()
-      .populate("dealer", "email phone");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const search = req.query.search || "";
+    const skip = (page - 1) * limit;
+    let matchStage = {};
 
-    const now = new Date();
+    /* ================= SEARCH ================= */
+    if (search.trim().length >= 2) {
+      const cleanedSearch = search.trim().replace(/\s+/g, " ");
+      const regex = new RegExp(cleanedSearch, "i");
+      const words = cleanedSearch.split(" ");
+      matchStage = {
+        $or: [
+          { firstName: regex },
+          { lastName: regex },
+          { rigvay_id: regex },
+          { email: regex },
+          // 🔥 Full name search support
+          {
+            $and: words.map(word => ({
+              $or: [
+                { firstName: new RegExp(word, "i") },
+                { lastName: new RegExp(word, "i") }
+              ]
+            }))
+          }
+        ]
+      };
+    }
+    const result = await DealerProfile.aggregate([
+      { $match: matchStage },
+      { $sort: { createdAt: -1 } },
+      {
+        $facet: {
+          data: [
+            { $skip: skip },
+            { $limit: limit }
+          ],
+          totalCount: [
+            { $count: "count" }
+          ]
+        }
+      }
+    ]);
 
-    const enrichedDealers = await Promise.all(
-      dealers.map(async (profile) => {
-        const subscription = await Subscription.findOne({
-          dealer: profile.dealer,
-          active: true,
-          endDate: { $gt: now }
-        }).sort({ endDate: -1 });
+    const dealers = result[0].data;
+    const totalDealers = result[0].totalCount[0]?.count || 0;
 
-        return {
-          ...profile.toObject(),
-          currentPlan: subscription?.planName || null,
-          planExpiry: subscription?.endDate || null
-        };
-      })
-    );
-
-    return res.status(200).json(
-      new ApiResponse(200, "All dealers fetched", enrichedDealers)
-    );
+    return res.status(200).json({
+      success: true,
+      message: "Dealers fetched successfully",
+      data: dealers,
+      pagination: {
+        total: totalDealers,
+        page,
+        limit,
+        totalPages: Math.ceil(totalDealers / limit)
+      }
+    });
   } catch (err) {
     console.error("getAllDealers error:", err);
-    return res.status(500).json(
-      new ApiResponse(500, "Server error", null)
-    );
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      data: null
+    });
   }
 };
 
@@ -128,6 +165,39 @@ module.exports.approveDealer = async (req, res) => {
     console.error("approveDealer error:", err);
     return res.status(500).json(
       new ApiResponse(500, "Internal server error", null)
+    );
+  }
+};
+
+/* ---------------------------------------------------
+   Rejected DEALER 
+--------------------------------------------------- */
+module.exports.rejectDealer = async (req, res) => {
+  try {
+    const { id } = req.params; // DealerProfile._id
+
+    const profile = await DealerProfile.findById(id);
+
+    if (!profile) {
+      return res.status(404).json(
+        new ApiResponse(404, "Dealer profile not found", null)
+      );
+    }
+
+    if (!profile.adminApproved) {
+      return res.status(400).json(
+        new ApiResponse(400, "Dealer already rejected", null)
+      );
+    }
+    profile.adminApproved = false;
+    await profile.save();
+    return res.status(200).json(
+      new ApiResponse(200, "Dealer rejected successfully", profile)
+    );
+
+  } catch (error) {
+    return res.status(500).json(
+      new ApiResponse(500, "Server error", null)
     );
   }
 };
@@ -254,8 +324,8 @@ module.exports.searchDealers = async (req, res) => {
         { companyName: regex }
       ]
     })
-      .populate("dealer", "email phone")
-      .limit(20);
+      .select("firstName lastName rigvay_id email companyName")
+      .limit(10);
 
     return res.status(200).json(
       new ApiResponse(200, "Dealers found", dealers)

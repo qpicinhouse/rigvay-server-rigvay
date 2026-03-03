@@ -11,7 +11,8 @@ const {
     getDealerSubscription,
     getDealerAllSubscriptions,
     deactivateSubscription,
-    reactivateSubscription
+    reactivateSubscription,
+    rejectDealer,
 } = require("../controllers/adminDealer.controller");
 
 /* ---------------------------------------------------
@@ -20,6 +21,7 @@ const {
 router.get("/dealers", getAllDealers);
 router.get("/dealers-unapproved", getUnapprovedDealers);
 router.post("/dealer-approve/:id", approveDealer);
+router.post("/dealer-reject/:id", rejectDealer);
 router.get("/dealers/search", searchDealers);
 
 /* ---------------------------------------------------
