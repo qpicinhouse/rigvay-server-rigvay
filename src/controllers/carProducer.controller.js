@@ -108,6 +108,43 @@ module.exports.updateProducerModels = async (req, res) => {
 };
 
 // ==========================================
+// ADMIN: Rename a Brand
+// ==========================================
+module.exports.renameProducer = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name } = req.body;
+
+        if (!name || !name.trim()) {
+            return res.status(400).json(new ApiResponse(400, null, "Name is required"));
+        }
+
+        // Check if the new name already exists (case-insensitive)
+        const existing = await CarProducer.findOne({
+            _id: { $ne: id },
+            name: { $regex: new RegExp(`^${name.trim()}$`, "i") }
+        });
+        if (existing) {
+            return res.status(400).json(new ApiResponse(400, null, "A brand with this name already exists"));
+        }
+
+        const producer = await CarProducer.findByIdAndUpdate(
+            id,
+            { $set: { name: name.trim() } },
+            { new: true, runValidators: true }
+        );
+
+        if (!producer) return res.status(404).json(new ApiResponse(404, null, "Brand not found"));
+
+        await rebuildCache();
+
+        return res.status(200).json(new ApiResponse(200, "Brand renamed successfully", producer));
+    } catch (error) {
+        return res.status(500).json(new ApiResponse(500, null, "Failed to rename brand"));
+    }
+};
+
+// ==========================================
 // ADMIN: Delete a Brand
 // ==========================================
 module.exports.deleteProducer = async (req, res) => {

@@ -11,6 +11,7 @@ router.post('/verify-login-otp', verifyLoginOTP);
 router.get("/producers", carProducerController.getAllProducers);
 router.post("/producers", carProducerController.createProducer);
 router.put("/producers/:id/models", carProducerController.updateProducerModels);
+router.put("/producers/:id/rename", carProducerController.renameProducer);
 router.delete("/producers/:id", carProducerController.deleteProducer);
 
 module.exports = router;
