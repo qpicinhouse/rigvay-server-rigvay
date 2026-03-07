@@ -38,4 +38,8 @@ router.delete("/cars/:carId", authMiddleware, deleteCar);
 //Public  Routes for get Single Car and
 router.get("/cars/v1/:carId", getSingleCarsByCarID);
 
+// Public fast dictionary route
+const { getFlatProducers } = require("../controllers/carProducer.controller");
+router.get("/producers/flat", getFlatProducers);
+
 module.exports = router;

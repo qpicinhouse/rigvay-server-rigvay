@@ -43,10 +43,15 @@ module.exports.getSearchResults = async (req, res) => {
 
         /* ---------------- SEARCH ---------------- */
         if (search) {
-            filter.$or = [
-                { brand: { $regex: search, $options: "i" } },
-                { model: { $regex: search, $options: "i" } }
-            ];
+            const words = search.trim().split(/\s+/);
+            filter.$and = (filter.$and || []).concat(
+                words.map(word => ({
+                    $or: [
+                        { brand: { $regex: word, $options: "i" } },
+                        { model: { $regex: word, $options: "i" } }
+                    ]
+                }))
+            );
         }
          /* ---------------- BRAND ---------------- */
         if (brand) {
@@ -177,3 +182,55 @@ module.exports.getRecentlyAddedCars = async (req, res) => {
     }
 };
 
+
+// ==================>> SEARCH SUGGESTIONS (Autocomplete) <<========================= 
+module.exports.getSuggestions = async (req, res) => {
+    try {
+        const { q } = req.query;
+
+        if (!q || q.trim().length < 2) {
+            return res.status(200).json(
+                new ApiResponse(200, "Suggestions fetched", { suggestions: [] })
+            );
+        }
+
+        const words = q.trim().split(/\s+/);
+
+        const filter = {
+            status: "live",
+            isDeleted: false,
+            $and: words.map(word => ({
+                $or: [
+                    { brand: { $regex: word, $options: "i" } },
+                    { model: { $regex: word, $options: "i" } }
+                ]
+            }))
+        };
+
+        const cars = await Car.find(filter)
+            .select("brand model")
+            .limit(20)
+            .lean();
+
+        // Deduplicate by "brand model" and return top 5
+        const seen = new Set();
+        const suggestions = [];
+        for (const car of cars) {
+            const label = `${car.brand} ${car.model}`;
+            if (!seen.has(label.toLowerCase())) {
+                seen.add(label.toLowerCase());
+                suggestions.push(label);
+                if (suggestions.length >= 10) break;
+            }
+        }
+
+        return res.status(200).json(
+            new ApiResponse(200, "Suggestions fetched", { suggestions })
+        );
+    } catch (error) {
+        console.error("SUGGESTIONS ERROR:", error);
+        return res
+            .status(500)
+            .json(new ApiResponse(500, null, "Failed to fetch suggestions"));
+    }
+};
