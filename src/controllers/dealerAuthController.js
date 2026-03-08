@@ -3,7 +3,7 @@ const DealerOTP = require("../models/dealerOtp.model");
 const { generateOTP, otpExpiry } = require("../utils/otp");
 const { sendOTPViaDLT } = require("../utils/dltService");
 const { ApiResponse } = require("../utils/ApiResponse");
-const { generateAccessToken } = require("../utils/token");
+const { generateAccessToken, generateResetToken, verifyResetToken } = require("../utils/token");
 const { hashPassword, comparePassword } = require("../utils/hash");
 const DealerProfile = require("../models/dealerProfile.model");
 const generateId = require("../utils/generateUniqueId");
@@ -223,6 +223,99 @@ module.exports.verifyLoginOTP = async function verifyLoginOTP(req, res) {
         rigvay_id: dealer.rigvay_id
       }
     }));
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(new ApiResponse(500, "Server error", ''));
+  }
+}
+
+module.exports.forgotPassword = async function forgotPassword(req, res) {
+  try {
+    const { phone } = req.body;
+    if (!phone) {
+      return res.status(400).json(new ApiResponse(400, "Missing phone", ''));
+    }
+
+    const dealer = await Dealer.findOne({ phone });
+    if (!dealer) {
+      return res.status(404).json(new ApiResponse(404, "Phone number not registered", ''));
+    }
+
+    const otp = generateOTP();
+    dealer.otp = otp;
+    dealer.otpExpires = otpExpiry(3);
+    await dealer.save();
+    await sendOTPViaDLT(phone, otp);
+
+    return res.status(200).json(new ApiResponse(200, "Password reset OTP sent", ''));
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(new ApiResponse(500, "Server error", ''));
+  }
+}
+
+module.exports.verifyResetOTP = async function verifyResetOTP(req, res) {
+  try {
+    const { phone, otp } = req.body;
+    if (!phone || !otp) {
+      return res.status(400).json(new ApiResponse(400, "Missing phone or otp", ''));
+    }
+
+    const dealer = await Dealer.findOne({ phone });
+    if (!dealer) {
+      return res.status(404).json(new ApiResponse(404, "Dealer not found", ''));
+    }
+
+    if (!dealer.otp || !dealer.otpExpires || new Date() > dealer.otpExpires) {
+      dealer.otp = undefined;
+      dealer.otpExpires = undefined;
+      await dealer.save();
+      return res.status(400).json(new ApiResponse(400, "OTP expired or not set", ''));
+    }
+
+    if (dealer.otp !== otp) {
+      return res.status(400).json(new ApiResponse(400, "Invalid OTP", ''));
+    }
+
+    dealer.otp = undefined;
+    dealer.otpExpires = undefined;
+    await dealer.save();
+
+    const resetToken = generateResetToken(dealer._id);
+
+    return res.status(200).json(new ApiResponse(200, "OTP verified", { resetToken }));
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(new ApiResponse(500, "Server error", ''));
+  }
+}
+
+module.exports.resetPassword = async function resetPassword(req, res) {
+  try {
+    const { resetToken, newPassword, confirmPassword } = req.body;
+    if (!resetToken || !newPassword || !confirmPassword) {
+      return res.status(400).json(new ApiResponse(400, "Missing fields", ''));
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json(new ApiResponse(400, "Passwords do not match", ''));
+    }
+
+    const dealerId = verifyResetToken(resetToken);
+    if (!dealerId) {
+      return res.status(400).json(new ApiResponse(400, "Invalid or expired reset token", ''));
+    }
+
+    const dealer = await Dealer.findById(dealerId);
+    if (!dealer) {
+      return res.status(404).json(new ApiResponse(404, "Dealer not found", ''));
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+    dealer.password = passwordHash;
+    await dealer.save();
+
+    return res.status(200).json(new ApiResponse(200, "Password reset successful", ''));
   } catch (err) {
     console.error(err);
     return res.status(500).json(new ApiResponse(500, "Server error", ''));

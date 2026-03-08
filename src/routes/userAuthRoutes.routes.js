@@ -6,7 +6,10 @@ const {
   verifyRegistrationOTP,
   loginWithEmail,
   sendLoginOTP,
-  verifyLoginOTP
+  verifyLoginOTP,
+  forgotPassword,
+  verifyResetOTP,
+  resetPassword
 } = require("../controllers/userAuth.controller");
 
 const router = express.Router();
@@ -23,5 +26,15 @@ router.post('/login', loginWithEmail);
 
 router.post('/send-login-otp', sendLoginOTP);
 router.post('/verify-login-otp', verifyLoginOTP);
+
+router.post('/forgot-password', forgotPassword);
+
+router.post('/verify-reset-otp',  verifyResetOTP);
+
+router.post('/reset-password', [
+  body('resetToken').notEmpty(),
+  body('newPassword').isLength({ min: 6 }),
+  body('confirmPassword').isLength({ min: 6 })
+], resetPassword);
 
 module.exports = router;

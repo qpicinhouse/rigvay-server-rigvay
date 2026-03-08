@@ -222,3 +222,111 @@ module.exports.getDealerProfile = async function getDealerProfile(req, res, next
     next(error);
   }
 };
+
+// Get a single car by ID
+exports.getCarsByCarID = async (req, res) => {
+  try {
+    const { carId } = req.params;
+
+    const car = await Car.findOne({
+      _id: carId,
+      isDeleted: false
+    });
+
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: 'Car not found'
+      });
+    }
+
+    res.json({ success: true, data: car });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+//  Edit car to sold
+exports.updateCar = async (req, res) => {
+  try {
+    console.log("Update request body:", req.body);
+
+    const car = await Car.findOne({
+      _id: req.params.carId,
+      isDeleted: false
+    });
+    // dealer: req.user.id,
+
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: "Car not found"
+      });
+    }
+
+    // Parse stringified JSON fields
+    const parsedBody = { ...req.body };
+
+    const jsonFields = [
+      'location',
+      'interiorEquipment',
+      'exteriorEquipment',
+      'environment',
+      'extras',
+      'existingImages'
+    ];
+
+    jsonFields.forEach(field => {
+      if (parsedBody[field] && typeof parsedBody[field] === 'string') {
+        try {
+          parsedBody[field] = JSON.parse(parsedBody[field]);
+        } catch (e) {
+          console.error(`Invalid JSON for ${field}:`, e);
+        }
+      }
+    });
+    const existingImages = parsedBody.existingImages;
+    delete parsedBody.existingImages;
+    // ✅ Direct assignment - no complex mapping needed!
+    Object.assign(car, parsedBody);
+    let imageUrls = [];
+
+    if (req.files?.length) {
+      for (const file of req.files) {
+        const uploaded = await uploadOnCloudinary(file.path);
+        if (uploaded?.secure_url) {
+          imageUrls.push(uploaded.secure_url); // index preserved
+        }
+      }
+    }
+    // Handle images
+    if (imageUrls.length && Array.isArray(existingImages)) {
+      car.images = [...existingImages, ...imageUrls];
+    } else if (imageUrls.length) {
+      car.images = imageUrls;
+    } else if (Array.isArray(existingImages)) {
+      car.images = existingImages;
+    }
+
+    await car.save();
+
+    res.json({
+      success: true,
+      message: "Car updated successfully",
+      data: car
+    });
+
+  } catch (error) {
+    console.error("Update car error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
+    });
+  }
+};
