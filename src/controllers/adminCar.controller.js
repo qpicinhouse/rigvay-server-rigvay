@@ -1,5 +1,7 @@
 const Car = require("../models/Car.model");
 const { ApiResponse } = require("../utils/ApiResponse");
+const {carApprovedEmail} = require("../utils/emailTemplates");
+const {sendEmail} = require("../utils/sendEmail");
 const DealerProfile = require('../models/dealerProfile.model');
 //GET ALL CARS
 module.exports.getAllCars = async function getAllCars(req, res) {
@@ -134,7 +136,13 @@ module.exports.approveCar = async (req, res) => {
       new ApiResponse(404, "Car not found")
     );
   }
+  // const carUrl = `https://rigvay.com/detail/${id}`;
 
+  // await sendEmail({
+  //   to: "sovanghorai6@gmail.com",
+  //   subject: "Your Car Listing is Approved",
+  //   html: carApprovedEmail(car.model, carUrl)
+  // });
   return res.status(200).json(
     new ApiResponse(200, "Car approved successfully", car)
   );
