@@ -246,7 +246,16 @@ exports.deleteCar = async (req, res) => {
 exports.getSingleCarsByCarID = async (req, res) => {
   try {
     const { carId } = req.params;
-    const car = await Car.findOne({ _id: carId, isDeleted: false });
+    
+    // Support matching by String carId (e.g. RIVCAR...) or Mongoose ObjectId
+    const query = { isDeleted: false };
+    if (/^[0-9a-fA-F]{24}$/.test(carId)) {
+      query.$or = [{ _id: carId }, { carId }];
+    } else {
+      query.carId = carId;
+    }
+
+    const car = await Car.findOne(query);
 
     if (!car) {
       return res.status(404).json({
@@ -263,7 +272,7 @@ exports.getSingleCarsByCarID = async (req, res) => {
     const dealerCars = await Car.find({
       dealer: dealer_id,
       isDeleted: false,
-      _id: { $ne: carId },
+      _id: { $ne: car._id },
     }).sort({ createdAt: -1 });
     res.json({
       success: true,
