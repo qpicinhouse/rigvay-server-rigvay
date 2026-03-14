@@ -20,13 +20,22 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
     let profile = await DealerProfile.findOne({ dealer: dealerId });
     if (!profile) profile = new DealerProfile({ dealer: dealerId });
 
-     if (req.file && req.file.path) {
-      const result = await uploadOnCloudinary(req.file.path);
-      if (result && result.secure_url) {
+    /* ---------------- profile image upload ---------------- */
+    if (req.files?.profileImage?.[0]) {
+      const result = await uploadOnCloudinary(req.files.profileImage[0].path);
+      if (result?.secure_url) {
         profile.profileImageUrl = result.secure_url;
       }
     }
+    /* ---------------- KYC document upload ---------------- */
+    if (req.files?.kycDocument?.[0]) {
+      const result = await uploadOnCloudinary(req.files.kycDocument[0].path);
+      if (result?.secure_url) {
+        profile.kycDocument = result.secure_url;
+      }
 
+    }
+    
     
     // Map allowed flat fields from payload into profile (model uses flat address fields)
     const fields = [
@@ -48,6 +57,10 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
       "website",
       "facebook",
       "instagram",
+      "kycDocumentType",
+      "kycDocumentNumber",
+      "kycDocument"
+
     ];
     fields.forEach((field) => {
       if (payload[field] !== undefined) {
@@ -68,6 +81,9 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
       "pincode",
       "district",
       "state",
+      "kycDocumentType",
+      "kycDocumentNumber",
+      "kycDocument"
     ];
 
     const missing = requiredFields.filter((field) => {
@@ -134,18 +150,25 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
 
     let profile = await DealerProfile.findOne({ dealer: dealerId });
     if (!profile) return res.status(404).json(new ApiResponse(404, 'Dealer profile not found'));
-    if (req.file && req.file.path) {
-        const result = await uploadOnCloudinary(req.file.path);
-        console.log("result ",result);
-        
-        if (result && result.secure_url) {
-          profile.profileImageUrl = result.secure_url;
-        }
+    if (req.files?.profileImage?.[0]) {
+      const result = await uploadOnCloudinary(req.files.profileImage[0].path);
+      if (result?.secure_url) {
+        profile.profileImageUrl = result.secure_url;
       }
+    }
+    /* ---------------- KYC document upload ---------------- */
+    if (req.files?.kycDocument?.[0]) {
+      const result = await uploadOnCloudinary(req.files.kycDocument[0].path);
+      if (result?.secure_url) {
+        profile.kycDocument = result.secure_url;
+      }
+
+    }
     const fields = [
       'firstName','lastName','phone','email','companyName','aboutCompany',
       'companyPhone','companyEmail','companyWhatsapp','addressLine1','addressLine2','addressLine3',
-      'pincode','district','state','website','facebook','instagram'
+      'pincode','district','state','website','facebook','instagram',"kycDocumentType",
+      "kycDocumentNumber", "kycDocument"
     ];
     fields.forEach(field => {
       if (payload[field] !== undefined) profile[field] = payload[field];
@@ -154,7 +177,8 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
     const requiredFields = [
       'firstName','lastName','companyName',
       'companyPhone','companyEmail','companyWhatsapp',
-      'addressLine1','addressLine2','pincode','district','state'
+      'addressLine1','addressLine2','pincode','district','state',"kycDocumentType",
+      "kycDocumentNumber", "kycDocument"
     ];
     const missing = requiredFields.filter(field => {
       const val = profile[field] !== undefined ? profile[field] : payload[field];

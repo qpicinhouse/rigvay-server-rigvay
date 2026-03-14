@@ -32,6 +32,13 @@ const dealerProfileSchema = new mongoose.Schema(
     adminApproved: { type: Boolean, default: false },
     // freeAccess: { type: Boolean, default: false },
     // subscription: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
+    kycDocumentType: {
+      type: String,
+      enum: ["Udyam Aadhaar Card", "BRN", "GST"],
+      required: true,
+    },
+    kycDocumentNumber: { type: String, required: true },
+    kycDocument: { type: String, required: true },
   },
   { timestamps: true }
 );

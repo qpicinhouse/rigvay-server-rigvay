@@ -3,7 +3,8 @@ const Subscription = require("../models/subscription.model");
 const Plan = require("../models/Plan.model");
 const { ApiResponse } = require("../utils/ApiResponse");
 const { calculatePlanEndDate } = require("../utils/dateUtils");
-
+const {dealerApprovedEmail} = require("../utils/emailTemplates");
+const {sendEmail} = require("../utils/sendEmail");
 /* ---------------------------------------------------
    GET ALL DEALERS (with current subscription info)
 --------------------------------------------------- */
@@ -120,7 +121,13 @@ module.exports.approveDealer = async (req, res) => {
     // 1️⃣ Approve dealer
     profile.adminApproved = true;
     await profile.save();
-
+    // Send approval email
+    const dealerName = `${profile.firstName} ${profile.lastName}`;
+    await sendEmail({
+      to: profile.email,
+      subject: "Your Dealer Account is Approved",
+      html: dealerApprovedEmail(dealerName)
+    });
     // 2️⃣ Fetch Free Trial plan
     const freePlan = await Plan.findOne({ name: "Free Trial" });
 

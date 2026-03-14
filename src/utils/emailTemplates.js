@@ -14,6 +14,21 @@ You can now log in and start listing your vehicles on our platform.
 We are excited to have you as part of our dealer network.
 </p>
 
+<p style="margin:25px 0;">
+<a href="https://rigvay.com"
+style="
+background:#007bff;
+color:#ffffff;
+padding:12px 20px;
+text-decoration:none;
+border-radius:6px;
+font-weight:bold;
+display:inline-block;
+">
+Go to Rigvay Website
+</a>
+</p>
+
 <p>
 Best regards,<br>
 Rigvay Team
@@ -21,6 +36,8 @@ Rigvay Team
 `;
 
 };
+
+module.exports = { dealerApprovedEmail };
 
 const carApprovedEmail = (name, carUrl) => {
 
