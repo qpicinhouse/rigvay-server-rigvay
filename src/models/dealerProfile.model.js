@@ -35,10 +35,9 @@ const dealerProfileSchema = new mongoose.Schema(
     kycDocumentType: {
       type: String,
       enum: ["Udyam Aadhaar Card", "BRN", "GST"],
-      required: true,
     },
-    kycDocumentNumber: { type: String, required: true },
-    kycDocument: { type: String, required: true },
+    kycDocumentNumber: { type: String },
+    kycDocument: { type: String},
   },
   { timestamps: true }
 );
