@@ -28,12 +28,15 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
       }
     }
     /* ---------------- KYC document upload ---------------- */
-    if (req.files?.kycDocument?.[0]) {
-      const result = await uploadOnCloudinary(req.files.kycDocument[0].path);
-      if (result?.secure_url) {
-        profile.kycDocument = result.secure_url;
-      }
+    if (req.files && req.files.kycDocument && req.files.kycDocument.length > 0) {
+      const file = req.files.kycDocument[0];
 
+      if (file.path) {
+        const result = await uploadOnCloudinary(file.path);
+        if (result?.secure_url) {
+          profile.kycDocument = result.secure_url;
+        }
+      }
     }
     
     
@@ -59,7 +62,6 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
       "instagram",
       "kycDocumentType",
       "kycDocumentNumber",
-      "kycDocument"
 
     ];
     fields.forEach((field) => {
@@ -157,18 +159,21 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
       }
     }
     /* ---------------- KYC document upload ---------------- */
-    if (req.files?.kycDocument?.[0]) {
-      const result = await uploadOnCloudinary(req.files.kycDocument[0].path);
-      if (result?.secure_url) {
-        profile.kycDocument = result.secure_url;
-      }
+    if (req.files && req.files.kycDocument && req.files.kycDocument.length > 0) {
+      const file = req.files.kycDocument[0];
 
+      if (file.path) {
+        const result = await uploadOnCloudinary(file.path);
+        if (result?.secure_url) {
+          profile.kycDocument = result.secure_url;
+        }
+      }
     }
     const fields = [
       'firstName','lastName','phone','email','companyName','aboutCompany',
       'companyPhone','companyEmail','companyWhatsapp','addressLine1','addressLine2','addressLine3',
       'pincode','district','state','website','facebook','instagram',"kycDocumentType",
-      "kycDocumentNumber", "kycDocument"
+      "kycDocumentNumber"
     ];
     fields.forEach(field => {
       if (payload[field] !== undefined) profile[field] = payload[field];
