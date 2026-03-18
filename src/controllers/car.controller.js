@@ -13,6 +13,9 @@ const buildImages = (files = []) =>
   }));
 
 exports.getCars = async (req, res) => {
+  const userLat = req.headers['x-user-latitude'];
+  const userLng = req.headers['x-user-longitude'];
+  console.log("userLat", userLat, "userLng", userLng);
   const page = parseInt(req.query.page) || 1;
   const limit = 2;
   const skip = (page - 1) * limit;
@@ -246,7 +249,9 @@ exports.deleteCar = async (req, res) => {
 exports.getSingleCarsByCarID = async (req, res) => {
   try {
     const { carId } = req.params;
-    
+    const userLat = req.headers['x-user-latitude'];
+    const userLng = req.headers['x-user-longitude'];
+    console.log("userLat", userLat, "userLng", userLng);
     // Support matching by String carId (e.g. RIVCAR...) or Mongoose ObjectId
     const query = { isDeleted: false };
     if (/^[0-9a-fA-F]{24}$/.test(carId)) {

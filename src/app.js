@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
-const bodyParser = require("body-parser"); 
+const bodyParser = require("body-parser");
 
 const rateLimiter = require("./middlewares/rateLimiter");
 const errorHandler = require("./middlewares/error.middleware");
@@ -18,7 +18,7 @@ const adminCarsRoutes = require("./routes/adminCars.routes");
 const searchPageRoutes = require("./routes/searchPage.routes");
 const userAuthRoutes = require("./routes/userAuthRoutes.routes");
 const carComparesRoutes = require("./routes/carCompares.routes")
-const { razorpayWebhook } = require("./controllers/razorpayWebhook.controller"); 
+const { razorpayWebhook } = require("./controllers/razorpayWebhook.controller");
 
 const app = express();
 
@@ -36,7 +36,7 @@ app.use(cors({
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "x-user-latitude", "x-user-longitude"]
 }));
 
 app.post(
