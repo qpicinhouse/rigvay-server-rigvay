@@ -18,6 +18,7 @@ const adminCarsRoutes = require("./routes/adminCars.routes");
 const searchPageRoutes = require("./routes/searchPage.routes");
 const userAuthRoutes = require("./routes/userAuthRoutes.routes");
 const carComparesRoutes = require("./routes/carCompares.routes")
+const adminCarsDownloadRoutes = require("./routes/adminCarsDownload.routes.js");
 const { razorpayWebhook } = require("./controllers/razorpayWebhook.controller");
 
 const app = express();
@@ -65,6 +66,7 @@ app.use('/api/cars/', searchPageRoutes);
 app.use('/api/public/', dealerPageRoutes);
 app.use('/api/public/', carRoutes);
 app.use('/api/public/', carComparesRoutes);
+app.use('/api/admin', adminCarsDownloadRoutes);
 app.get('/home', (req, res) => {
   res.send("hello Andro How's it going?");
 });

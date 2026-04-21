@@ -10,12 +10,13 @@ function generateRegvayId() {
 module.exports.createDealerProfile = async function dealerProfile(req, res, next) {
   try {
     const dealerId = req.user.id;
-    console.log("dealerId", req.user || req.dealer);
     const payload = req.body || {};
-
+    const rigvay_id = req.user.rigvay_id ?? '';
     const dealer = await Dealer.findById(dealerId);
     if (!dealer)
       return res.status(404).json(new ApiResponse(404, "Dealer not found"));
+    if (!rigvay_id)
+      return res.status(404).json(new ApiResponse(404, "Rigvay ID not found"));
 
     let profile = await DealerProfile.findOne({ dealer: dealerId });
     if (!profile) profile = new DealerProfile({ dealer: dealerId });
@@ -38,8 +39,10 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
         }
       }
     }
-    
-    
+    // Set rigvay_id only if creating new profile, ignore if updating existing profile
+    if (!profile.rigvay_id) {
+      profile.rigvay_id = rigvay_id;
+    }    
     // Map allowed flat fields from payload into profile (model uses flat address fields)
     const fields = [
       "firstName",
@@ -144,6 +147,7 @@ module.exports.getDealerProfile = async function getDealerProfile(req, res, next
 module.exports.updateDealerProfile = async function updateDealerProfile(req, res, next) {
   try {
     const dealerId = req.user.id;
+    const rigvay_id = req.user.rigvay_id ?? '';
     const payload = req.body || {};
     console.log("payload ",payload);
 
@@ -151,6 +155,9 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
     if (!dealer) return res.status(404).json(new ApiResponse(404, 'Dealer not found'));
 
     let profile = await DealerProfile.findOne({ dealer: dealerId });
+    if (!profile.rigvay_id) {
+      profile.rigvay_id = rigvay_id;
+    } 
     if (!profile) return res.status(404).json(new ApiResponse(404, 'Dealer profile not found'));
     if (req.files?.profileImage?.[0]) {
       const result = await uploadOnCloudinary(req.files.profileImage[0].path);

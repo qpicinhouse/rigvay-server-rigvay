@@ -320,19 +320,49 @@ module.exports.searchDealers = async (req, res) => {
       );
     }
 
-    const regex = new RegExp(q.trim(), "i");
+    const cleanedSearch = q.trim().replace(/\s+/g, " ");
+    const regex = new RegExp(cleanedSearch, "i");
+    const words = cleanedSearch.split(" ");
 
-    const dealers = await DealerProfile.find({
+    /* ================= MATCH ================= */
+    const matchStage = {
       $or: [
         { firstName: regex },
         { lastName: regex },
         { rigvay_id: regex },
         { email: regex },
-        { companyName: regex }
+        { companyName: regex },
+
+        // FULL NAME SEARCH (same as getAllDealers)
+        {
+          $and: words.map(word => ({
+            $or: [
+              { firstName: new RegExp(word, "i") },
+              { lastName: new RegExp(word, "i") }
+            ]
+          }))
+        }
       ]
-    })
-      .select("firstName lastName rigvay_id email companyName")
-      .limit(10);
+    };
+
+    /* ================= AGGREGATION ================= */
+    const dealers = await DealerProfile.aggregate([
+      { $match: matchStage },
+      { $sort: { createdAt: -1 } },
+      { $limit: 10 },
+
+      // ✅ Only required fields
+      {
+        $project: {
+          dealer: 1,
+          firstName: 1,
+          lastName: 1,
+          rigvay_id: 1,
+          email: 1,
+          companyName: 1
+        }
+      }
+    ]);
 
     return res.status(200).json(
       new ApiResponse(200, "Dealers found", dealers)
