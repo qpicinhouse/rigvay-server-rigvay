@@ -1,6 +1,6 @@
 const Car = require('../models/Car.model');
 const Subscription = require('../models/subscription.model');
-const { uploadToS3 } = require("../utils/s3");
+const { uploadToS3, deleteFromS3 } = require("../utils/s3");
 const generateId = require("../utils/generateUniqueId");
 const DealerProfile = require('../models/dealerProfile.model');
 const Dealer = require('../models/dealer.model');
@@ -201,6 +201,16 @@ exports.updateCar = async (req, res) => {
         }
       }
     }
+    // Detect removed images and delete them from S3
+    const oldImages = car.images || [];
+    const keptImages = Array.isArray(existingImages) ? existingImages : [];
+    const removedImages = oldImages.filter(url => !keptImages.includes(url));
+
+    // Delete removed images from S3 in parallel (non-blocking)
+    if (removedImages.length > 0) {
+      await Promise.all(removedImages.map(url => deleteFromS3(url)));
+    }
+
     // Handle images
     if (imageUrls.length && Array.isArray(existingImages)) {
       car.images = [...existingImages, ...imageUrls];

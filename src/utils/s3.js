@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const generateId = require("./generateUniqueId"); // Using the existing ID generator or a simple suffix
 
 const s3Client = new S3Client({
@@ -37,4 +37,24 @@ const uploadToS3 = async (buffer, mimetype, originalname) => {
   }
 };
 
-module.exports = { uploadToS3 };
+const deleteFromS3 = async (fileUrl) => {
+  try {
+    if (!fileUrl) return;
+
+    // Extract the key from the S3 URL
+    const url = new URL(fileUrl);
+    const key = decodeURIComponent(url.pathname.slice(1)); // Remove leading "/"
+
+    const command = new DeleteObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: key,
+    });
+
+    await s3Client.send(command);
+    console.log(`Deleted from S3: ${key}`);
+  } catch (error) {
+    console.error("S3 Delete Error:", error);
+  }
+};
+
+module.exports = { uploadToS3, deleteFromS3 };
