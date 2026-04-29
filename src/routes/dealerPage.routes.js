@@ -13,6 +13,7 @@ router.post("/update-page",authMiddleware,upload.fields([
     { name: "bannerOneUrl", maxCount: 1 },
     { name: "bannerTwoUrl", maxCount: 1 }
   ]),
+  compressImages,
   updatePage
 );
 //GET /api/public/dealer/:rigvay_id?page=1&limit=10

@@ -1,6 +1,6 @@
 const Car = require('../models/Car.model');
 const Subscription = require('../models/subscription.model');
-const { uploadOnCloudinary } = require("../utils/cloudinary");
+const { uploadToS3 } = require("../utils/s3");
 const generateId = require("../utils/generateUniqueId");
 const DealerProfile = require('../models/dealerProfile.model');
 const Dealer = require('../models/dealer.model');
@@ -130,7 +130,7 @@ exports.addCar = async (req, res) => {
 
   if (req.files && req.files.length > 0) {
     for (const file of req.files) {
-      const uploaded = await uploadOnCloudinary(file.path);
+      const uploaded = await uploadToS3(file.buffer, file.mimetype, file.originalname);
       if (uploaded?.secure_url) {
         imageUrls.push(uploaded.secure_url);
       }
@@ -195,7 +195,7 @@ exports.updateCar = async (req, res) => {
 
     if (req.files?.length) {
       for (const file of req.files) {
-        const uploaded = await uploadOnCloudinary(file.path);
+        const uploaded = await uploadToS3(file.buffer, file.mimetype, file.originalname);
         if (uploaded?.secure_url) {
           imageUrls.push(uploaded.secure_url); // index preserved
         }

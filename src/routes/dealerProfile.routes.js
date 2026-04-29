@@ -10,7 +10,7 @@ const { createDealerProfile, getDealerProfile, updateDealerProfile } = require("
 router.post('/create-profile', authMiddleware, upload.fields([
 { name: 'profileImage', maxCount: 1 },
 { name: 'kycDocument', maxCount: 1 }
-]), createDealerProfile);
+]), compressImages, createDealerProfile);
 
 // GET /api/dealer/get-profile  -> fetch profile for authenticated dealer
 router.get('/get-profile', authMiddleware, getDealerProfile);
@@ -19,6 +19,6 @@ router.get('/get-profile', authMiddleware, getDealerProfile);
 router.put('/update-profile', authMiddleware, upload.fields([
 { name: 'profileImage', maxCount: 1 },
 { name: 'kycDocument', maxCount: 1 }
-]), updateDealerProfile);
+]), compressImages, updateDealerProfile);
 
 module.exports = router;

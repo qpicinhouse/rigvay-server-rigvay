@@ -1,7 +1,7 @@
 const Dealer = require("../models/dealer.model");
 const DealerProfile = require("../models/dealerProfile.model");
 const Subscription = require("../models/subscription.model");
-const { uploadOnCloudinary } = require("../utils/cloudinary");
+const { uploadToS3 } = require("../utils/s3");
 const { ApiResponse } = require("../utils/ApiResponse");
 function generateRegvayId() {
   return Math.floor(1000000000 + Math.random() * 9000000000).toString();
@@ -23,7 +23,8 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
 
     /* ---------------- profile image upload ---------------- */
     if (req.files?.profileImage?.[0]) {
-      const result = await uploadOnCloudinary(req.files.profileImage[0].path);
+      const file = req.files.profileImage[0];
+      const result = await uploadToS3(file.buffer, file.mimetype, file.originalname);
       if (result?.secure_url) {
         profile.profileImageUrl = result.secure_url;
       }
@@ -32,8 +33,8 @@ module.exports.createDealerProfile = async function dealerProfile(req, res, next
     if (req.files && req.files.kycDocument && req.files.kycDocument.length > 0) {
       const file = req.files.kycDocument[0];
 
-      if (file.path) {
-        const result = await uploadOnCloudinary(file.path);
+      if (file.buffer) {
+        const result = await uploadToS3(file.buffer, file.mimetype, file.originalname);
         if (result?.secure_url) {
           profile.kycDocument = result.secure_url;
         }
@@ -160,7 +161,8 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
     } 
     if (!profile) return res.status(404).json(new ApiResponse(404, 'Dealer profile not found'));
     if (req.files?.profileImage?.[0]) {
-      const result = await uploadOnCloudinary(req.files.profileImage[0].path);
+      const file = req.files.profileImage[0];
+      const result = await uploadToS3(file.buffer, file.mimetype, file.originalname);
       if (result?.secure_url) {
         profile.profileImageUrl = result.secure_url;
       }
@@ -169,8 +171,8 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
     if (req.files && req.files.kycDocument && req.files.kycDocument.length > 0) {
       const file = req.files.kycDocument[0];
 
-      if (file.path) {
-        const result = await uploadOnCloudinary(file.path);
+      if (file.buffer) {
+        const result = await uploadToS3(file.buffer, file.mimetype, file.originalname);
         if (result?.secure_url) {
           profile.kycDocument = result.secure_url;
         }

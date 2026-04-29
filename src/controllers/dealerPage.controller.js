@@ -1,6 +1,6 @@
 const DealerPage = require("../models/dealerPage.model");
 const DealerProfile = require("../models/dealerProfile.model");
-const { uploadOnCloudinary } = require("../utils/cloudinary");
+const { uploadToS3 } = require("../utils/s3");
 const { ApiResponse } = require("../utils/ApiResponse");
 const Car = require("../models/Car.model");
 const Dealer = require("../models/dealer.model");
@@ -55,19 +55,19 @@ module.exports.updatePage = async function updatePage(req, res) {
         }
         let dealerPage = await DealerPage.findOne({ dealer: dealerId });
 
-        const image1LocalPath = req.files?.bannerOneUrl?.[0]?.path;
-        const image2LocalPath = req.files?.bannerTwoUrl?.[0]?.path;
+        const image1LocalPath = req.files?.bannerOneUrl?.[0];
+        const image2LocalPath = req.files?.bannerTwoUrl?.[0];
 
         let bannerOneUrl = dealerPage?.bannerOneUrl || "";
         let bannerTwoUrl = dealerPage?.bannerTwoUrl || "";
 
         if (image1LocalPath) {
-            const upload1 = await uploadOnCloudinary(image1LocalPath);
+            const upload1 = await uploadToS3(image1LocalPath.buffer, image1LocalPath.mimetype, image1LocalPath.originalname);
             bannerOneUrl = upload1?.secure_url;
         }
 
         if (image2LocalPath) {
-            const upload2 = await uploadOnCloudinary(image2LocalPath);
+            const upload2 = await uploadToS3(image2LocalPath.buffer, image2LocalPath.mimetype, image2LocalPath.originalname);
             bannerTwoUrl = upload2?.secure_url;
         }
 

@@ -10,20 +10,7 @@ fs.mkdirSync(tempDir, { recursive: true });
 fs.mkdirSync(uploadDir, { recursive: true });
 
 /* ---------------- MULTER STORAGE ---------------- */
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, tempDir);
-  },
-
-  filename: function (req, file, cb) {
-    const uniqueSuffix =
-      Date.now() + "-" + Math.round(Math.random() * 1e9);
-
-    const ext = path.extname(file.originalname);
-
-    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
-  },
-});
+const storage = multer.memoryStorage(); // Store files in memory as buffers
 
 const upload = multer({ storage });
 
@@ -66,43 +53,55 @@ const upload = multer({ storage });
 //   }
 // };
 
+const compressImageFile = async (file) => {
+  if (!file.mimetype.startsWith("image/")) return file;
+  
+  const compressedBuffer = await sharp(file.buffer)
+    .resize(1200, undefined, { withoutEnlargement: true })
+    .webp({ quality: 80 })
+    .toBuffer();
+
+  // Only use compressed version if it's actually smaller
+  if (compressedBuffer.length >= file.buffer.length) {
+    return file; // Original is already well-optimized, keep it as-is
+  }
+
+  const parseName = path.parse(file.originalname);
+  const newName = parseName.name + ".webp";
+
+  return {
+    ...file,
+    originalname: newName,
+    mimetype: "image/webp",
+    buffer: compressedBuffer,
+    size: compressedBuffer.length
+  };
+};
+
 const compressImages = async (req, res, next) => {
   try {
-    if (!req.files || req.files.length === 0) return next();
-
-    const compressedFiles = [];
-
-    for (const file of req.files) {
-      const inputPath = file.path;
-
-      const compressedFilename = "compressed-" + file.filename;
-      const outputPath = path.join(uploadDir, compressedFilename);
-
-      // Compress image
-      await sharp(inputPath)
-        .resize(1200)
-        .jpeg({ quality: 70 })
-        .toFile(outputPath);
-
-      // Delete temp file IMMEDIATELY after compression
-      try {
-        if (fs.existsSync(inputPath)) {
-          fs.unlinkSync(inputPath);
-          console.log(`Deleted temp file: ${inputPath}`);
-        }
-      } catch (deleteError) {
-        console.error(`Failed to delete temp file: ${inputPath}`, deleteError);
-      }
-
-      compressedFiles.push({
-        ...file,
-        path: outputPath,
-        filename: compressedFilename,
-      });
+    if (req.file) {
+      req.file = await compressImageFile(req.file);
     }
-
-    // Replace req.files with compressed versions
-    req.files = compressedFiles;
+    
+    if (req.files) {
+      if (Array.isArray(req.files)) {
+        const compressedFiles = [];
+        for (const file of req.files) {
+          compressedFiles.push(await compressImageFile(file));
+        }
+        req.files = compressedFiles;
+      } else {
+        const compressedFiles = {};
+        for (const fieldName in req.files) {
+          compressedFiles[fieldName] = [];
+          for (const file of req.files[fieldName]) {
+            compressedFiles[fieldName].push(await compressImageFile(file));
+          }
+        }
+        req.files = compressedFiles;
+      }
+    }
 
     next();
   } catch (error) {
