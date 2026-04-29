@@ -11,7 +11,8 @@ const {
   deleteCar,
   getCarsByCarID,
   getCarStats,
-  getSingleCarsByCarID
+  getSingleCarsByCarID,
+  markCarAsSold
 } = require("../controllers/car.controller");
 
 router.get("/cars", authMiddleware, getCars);
@@ -34,6 +35,7 @@ router.put(
 );
 
 router.delete("/cars/:carId", authMiddleware, deleteCar);
+router.patch("/cars/:carId/mark-sold", authMiddleware, markCarAsSold);
 
 //Public  Routes for get Single Car and
 router.get("/cars/v1/:carId", getSingleCarsByCarID);

@@ -229,6 +229,38 @@ exports.updateCar = async (req, res) => {
 };
 
 
+exports.markCarAsSold = async (req, res) => {
+  try {
+    const car = await Car.findOne({
+      _id: req.params.carId,
+      dealer: req.user.id,
+      isDeleted: false
+    });
+
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: "Car not found"
+      });
+    }
+
+    car.status = "sold";
+    await car.save();
+
+    res.json({
+      success: true,
+      message: "Car marked as sold"
+    });
+  } catch (error) {
+    console.error("Mark car as sold error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
+    });
+  }
+};
+
 exports.deleteCar = async (req, res) => {
   const car = await Car.findOne({
     _id: req.params.carId,
