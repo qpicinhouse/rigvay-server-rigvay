@@ -1,7 +1,7 @@
 const Dealer = require("../models/dealer.model");
 const DealerProfile = require("../models/dealerProfile.model");
 const Subscription = require("../models/subscription.model");
-const { uploadToS3 } = require("../utils/s3");
+const { uploadToS3, deleteFromS3 } = require("../utils/s3");
 const { ApiResponse } = require("../utils/ApiResponse");
 function generateRegvayId() {
   return Math.floor(1000000000 + Math.random() * 9000000000).toString();
@@ -162,6 +162,10 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
     if (!profile) return res.status(404).json(new ApiResponse(404, 'Dealer profile not found'));
     if (req.files?.profileImage?.[0]) {
       const file = req.files.profileImage[0];
+      // Delete old profile image from S3
+      if (profile.profileImageUrl) {
+        await deleteFromS3(profile.profileImageUrl);
+      }
       const result = await uploadToS3(file.buffer, file.mimetype, file.originalname);
       if (result?.secure_url) {
         profile.profileImageUrl = result.secure_url;
@@ -172,6 +176,10 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
       const file = req.files.kycDocument[0];
 
       if (file.buffer) {
+        // // Delete old KYC document from S3
+        // if (profile.kycDocument) {
+        //   await deleteFromS3(profile.kycDocument);
+        // }
         const result = await uploadToS3(file.buffer, file.mimetype, file.originalname);
         if (result?.secure_url) {
           profile.kycDocument = result.secure_url;
