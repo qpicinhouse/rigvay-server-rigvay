@@ -18,7 +18,8 @@ const authMiddleware = (req, res, next) => {
     // Attach user data to request
     req.user = {
       id: decoded.id,
-      email: decoded.email,
+      email: decoded.email ?? '',
+      name : decoded.name ?? '',
       phone: decoded.phone,
       userType: decoded.userType, // 'dealer' or 'buyer'
       rigvay_id: decoded.rigvay_id
