@@ -1,43 +1,67 @@
-// services/leadService.js
-
 const UserLead = require("../models/userLead.model");
 
-exports.createLead = async (data) => {
+exports.createLead = async (req, res) => {
     try {
         const now = new Date();
 
-        // 🔍 check existing
-        const exists = await Lead.findOne({
-            user_id: data.user_id,
-            car_id: data.car_id,
-            action_type: data.action_type
-        });
+        const user_id = req.user.id;
+        const { car_id, action_type } = req.body;
+        const user_rigvay_id = req.user.rigvay_id;
+        const phone = req.user.phone;
+        const name = req.user.name ?? '';
 
-        // ✅ If exists → update last enquiry date
-        if (exists) {
-            exists.enquiry_last_date = now;
-            await exists.save();
-
-            return {
-                success: true,
-                message: "Lead updated (repeat enquiry)",
-                data: exists
-            };
+        if (!user_id || !car_id || !action_type) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields"
+            });
         }
 
-        // ✅ else → create new
-        const newLead = await Lead.create({
-            ...data,
+        // 🔍 find latest lead (same user + car + action)
+        const lastLead = await UserLead.findOne({
+            user_id,
+            car_id,
+            action_type
+        }).sort({ enquiry_last_date: -1 });
+
+        // ✅ ALWAYS update latest lead (important for analytics)
+        if (lastLead) {
+            lastLead.enquiry_last_date = now;
+            await lastLead.save();
+
+            console.log("Lead updated for analytics tracking");
+
+            return res.status(200).json({
+                success: true,
+                message: "Lead updated (tracking latest enquiry)",
+                data: lastLead
+            });
+        }
+
+        // 🆕 if no previous lead → create first entry
+        const newLead = await UserLead.create({
+            ...req.body,
+            user_id,
+            user_rigvay_id: user_rigvay_id,
+            user_phone: phone,
+            user_name: name,
             enquiry_last_date: now
         });
 
-        return {
+        console.log("New lead created");
+
+        return res.status(200).json({
             success: true,
-            message: "Lead created",
+            message: "New lead created",
             data: newLead
-        };
+        });
 
     } catch (error) {
-        throw new Error(error.message);
+        console.log("Error:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 };

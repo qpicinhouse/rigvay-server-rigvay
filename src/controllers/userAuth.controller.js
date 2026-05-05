@@ -48,10 +48,8 @@ module.exports.verifyOtp = async (req, res) => {
       return res.status(400).json(
         new ApiResponse(400, "Phone and OTP required", "")
       );
-    }
-
+    }    
     const temp = await UserOTP.findOne({ phone });
-
     if (!temp) {
       return res.status(404).json(
         new ApiResponse(404, "OTP not found", "")
@@ -73,13 +71,14 @@ module.exports.verifyOtp = async (req, res) => {
 
     // 🔥 CHECK USER EXIST
     let user = await User.findOne({ phone });
-
+    console.log("two");   
     if (!user) {
       // 👉 SIGNUP
+      const rigvay_id = await generateId("user");
       user = await User.create({
         phone,
         name,
-        rivuser_id: await generateId("user"),
+        rigvay_id,
       });
     } else {
       // 👉 OPTIONAL name update
@@ -88,13 +87,13 @@ module.exports.verifyOtp = async (req, res) => {
         await user.save();
       }
     }
-
     // LOGIN TOKEN
     const token = generateAccessToken(
       {
         id: user._id,
         phone: user.phone,
-        rivuser_id: user.rivuser_id,
+        name: user.name ?? '',
+        rigvay_id: user.rigvay_id ?? '',
       },
       "user"
     );

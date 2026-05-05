@@ -20,6 +20,7 @@ const userAuthRoutes = require("./routes/userAuthRoutes.routes");
 const carComparesRoutes = require("./routes/carCompares.routes")
 const adminCarsDownloadRoutes = require("./routes/adminCarsDownload.routes.js");
 const userLeadRoutes = require("./routes/userLead.routes.js");
+const adminUserAnalyticsRoutes = require("./routes/adminUserAnalytics.routes.js");
 const { razorpayWebhook } = require("./controllers/razorpayWebhook.controller");
 
 const app = express();
@@ -35,7 +36,8 @@ app.use(cors({
     'https://rigvay-client.vercel.app',
     "https://rigvay-admin.vercel.app",
     "https://rigvay.com",
-    "http://localhost:5178"
+    "http://localhost:5178",
+    "http://localhost:3001/"
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -70,6 +72,7 @@ app.use('/api/public/', carRoutes);
 app.use('/api/public/', carComparesRoutes);
 app.use('/api/admin', adminCarsDownloadRoutes);
 app.use('/api/user', userLeadRoutes);
+app.use('/api/admin', adminUserAnalyticsRoutes);
 app.get('/home', (req, res) => {
   res.send("hello Andro How's it going?");
 });
