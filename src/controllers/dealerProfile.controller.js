@@ -200,7 +200,7 @@ module.exports.updateDealerProfile = async function updateDealerProfile(req, res
       'firstName','lastName','companyName',
       'companyPhone','companyEmail','companyWhatsapp',
       'addressLine1','addressLine2','pincode','district','state',"kycDocumentType",
-      "kycDocumentNumber", "kycDocument"
+      "kycDocumentNumber",
     ];
     const missing = requiredFields.filter(field => {
       const val = profile[field] !== undefined ? profile[field] : payload[field];
