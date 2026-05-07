@@ -116,7 +116,7 @@ const carSchema = new mongoose.Schema(
       enum: ["live", "review", "sold"],
       default: "review"
     },
-
+    views: { type: Number, default: 0 },
     postedAt: { type: Date, default: Date.now },
     isDeleted: { type: Boolean, default: false }
   },
@@ -125,5 +125,6 @@ const carSchema = new mongoose.Schema(
 
 carSchema.index({ dealer: 1, isDeleted: 1 });
 carSchema.index({ status: 1 });
+carSchema.index({ carId: 1 });
 
 module.exports = mongoose.model("Car", carSchema);
