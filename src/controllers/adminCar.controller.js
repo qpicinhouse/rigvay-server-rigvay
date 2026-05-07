@@ -30,6 +30,7 @@ module.exports.getAllCars = async function getAllCars(req, res) {
                 location: 1,
                 images: 1,
                 status: 1,
+                views: 1,
                 createdAt: 1
             })
             .populate("dealer", "firstName lastName rigvay_id")
@@ -92,6 +93,7 @@ module.exports.getUnapprovedCars = async function getUnapprovedCars(req, res) {
         location: 1,
         images: 1,
         status: 1,
+        views: 1,
         createdAt: 1
       })
       .populate("dealer", "firstName lastName rigvay_id")
