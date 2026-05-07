@@ -12,7 +12,8 @@ const {
   getCarsByCarID,
   getCarStats,
   getSingleCarsByCarID,
-  markCarAsSold
+  markCarAsSold,
+  increaseCarViewCount,
 } = require("../controllers/car.controller");
 
 router.get("/cars", authMiddleware, getCars);
@@ -44,4 +45,5 @@ router.get("/cars/v1/:carId", getSingleCarsByCarID);
 const { getFlatProducers } = require("../controllers/carProducer.controller");
 router.get("/producers/flat", getFlatProducers);
 
+router.post("/cars/increase-view/:carId", increaseCarViewCount);
 module.exports = router;

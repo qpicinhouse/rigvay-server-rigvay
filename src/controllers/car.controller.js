@@ -339,3 +339,64 @@ exports.getSingleCarsByCarID = async (req, res) => {
     });
   }
 };
+
+
+// INCREASE VIEW COUNT
+// =========================================
+exports.increaseCarViewCount = async (req, res) => {
+  try {
+
+    const { carId } = req.params;
+
+    let car;
+    // FIRST FIND USING CUSTOM carId
+    car = await Car.findOneAndUpdate(
+      { carId: carId },
+      {
+        $inc: {
+          views: 1,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    // =========================================
+    if (!car) {
+
+      car = await Car.findByIdAndUpdate(
+        carId,
+        {
+          $inc: {
+            views: 1,
+          },
+        },
+        {
+          new: true,
+        }
+      );
+
+    }
+    // IF STILL NOT FOUND
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: "Car not found",
+      });
+
+    }
+    res.status(200).json({
+      success: true,
+      message: "View count updated",
+      totalViews: car.views,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
