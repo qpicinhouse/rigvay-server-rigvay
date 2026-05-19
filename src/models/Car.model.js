@@ -125,6 +125,4 @@ const carSchema = new mongoose.Schema(
 
 carSchema.index({ dealer: 1, isDeleted: 1 });
 carSchema.index({ status: 1 });
-carSchema.index({ carId: 1 });
-
 module.exports = mongoose.model("Car", carSchema);
