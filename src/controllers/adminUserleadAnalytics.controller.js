@@ -23,7 +23,7 @@ exports.getLeadAnalytics = async (req, res) => {
         } = req.query;
 
         page = Number(page) || 1;
-        limit = Math.min(Number(limit) || 20, 100);
+        limit = Math.min(Number(limit) || 20, 300); // Max 300 per page
         const skip = (page - 1) * limit;
 
         let matchStage = {};
