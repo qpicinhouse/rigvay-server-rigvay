@@ -4,13 +4,19 @@ const Dealer = require("../models/dealer.model");
 
 exports.getFilteredDownloadCars = async (req, res) => {
   try {
-    const { type, startDate, dealerId, rigvay_id } = req.query;
+    const { type, startDate, dealerId, rigvay_id , showDeleted} = req.query;
 
     let filter = {
-      isDeleted: false,
+      // isDeleted: false,
       status: "live"
     };
 
+    // Deleted checkbox logic
+    if (showDeleted === "true") {
+      filter.isDeleted = true;
+    } else {
+      filter.isDeleted = false;
+    }
     /* ================= DEALER FIND (rigvay_id) ================= */
     let finalDealerId = dealerId;
 
