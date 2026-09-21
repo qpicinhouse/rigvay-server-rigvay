@@ -4,7 +4,7 @@ const Dealer = require("../models/dealer.model");
 
 exports.getFilteredDownloadCars = async (req, res) => {
   try {
-    const { type, startDate, dealerId, rigvay_id } = req.query;
+    const { type, startDate, endDate, dealerId, rigvay_id } = req.query;
 
     let filter = {
       isDeleted: false,
@@ -45,11 +45,12 @@ exports.getFilteredDownloadCars = async (req, res) => {
       filter.createdAt = { $gte: start, $lte: end };
     }
 
-    // ✅ Start date → Today
+    // ✅ Start date → End date or Today
     else if (startDate) {
       const start = new Date(startDate);
 
-      const end = new Date(); // today
+      const end = endDate ? new Date(endDate) : new Date();
+      end.setHours(23, 59, 59, 999);
 
       filter.createdAt = {
         $gte: start,
