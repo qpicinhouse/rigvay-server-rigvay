@@ -39,6 +39,10 @@ module.exports.getAllCars = async function getAllCars(req, res) {
             .limit(limit);   // ✅ added
 
         const totalCars = await Car.countDocuments({ isDeleted: false });
+        const totalUnapprovedCars = await Car.countDocuments({
+            isDeleted: false,
+            status: "review"
+        });
 
         return res.status(200).json({
             success: true,
@@ -47,6 +51,7 @@ module.exports.getAllCars = async function getAllCars(req, res) {
             pagination: {
                 currentPage: page,
                 totalPages: Math.ceil(totalCars / limit),
+                totalUnapprovedCars,
                 totalCars,
                 limit
             }
